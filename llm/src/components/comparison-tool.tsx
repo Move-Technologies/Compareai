@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -55,6 +55,32 @@ const ComparisonApp = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ComparisonResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState(
+    "Analyzing your documents..."
+  );
+
+  const loadingMessages = [
+    "Analyzing your documents...",
+    "Comparing line items...",
+    "Crunching the numbers...",
+    "Almost there...",
+    "Our AI is working its magic...",
+    "Generating insights...",
+  ];
+
+  useEffect(() => {
+    if (!loading) return;
+
+    const interval = setInterval(() => {
+      setLoadingMessage((prev) => {
+        const currentIndex = loadingMessages.indexOf(prev);
+        const nextIndex = (currentIndex + 1) % loadingMessages.length;
+        return loadingMessages[nextIndex];
+      });
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const handleFileChange = (e, fileNum) => {
     const file = e.target.files[0];
@@ -97,7 +123,7 @@ const ComparisonApp = () => {
       formData.append("file2", files.file2);
 
       const response = await fetch(
-        "https://flask-backend-liart-nine.vercel.app/api/compare",
+        "https://hunter10471.eu.pythonanywhere.com/api/compare",
         // "http://localhost:5000/api/compare",
         {
           method: "POST",
@@ -178,9 +204,9 @@ const ComparisonApp = () => {
             <h4 className="font-medium text-lg">
               {item.description || "Unnamed Item"}
             </h4>
-            <span className="text-sm text-gray-600">
+            {/* <span className="text-sm text-gray-600">
               Match Confidence: {formatPercentage(safe(item.match_confidence))}%
-            </span>
+            </span> */}
           </div>
 
           {/* Main comparison grid */}
@@ -405,7 +431,7 @@ const ComparisonApp = () => {
         )} */}
 
         {/* Largest Discrepancies */}
-        {insights.summary?.largest_discrepancies?.length > 0 && (
+        {/* {insights.summary?.largest_discrepancies?.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>Largest Discrepancies</CardTitle>
@@ -436,7 +462,7 @@ const ComparisonApp = () => {
               </div>
             </CardContent>
           </Card>
-        )}
+        )} */}
 
         {/* Key Findings and Recommendations Grid */}
         {(insights.key_findings?.length > 0 ||
@@ -450,12 +476,17 @@ const ComparisonApp = () => {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {insights.key_findings.map((finding, index) => (
-                      <li key={index} className="flex gap-2">
-                        <span className="text-blue-500">•</span>
-                        <span className="text-sm">{finding}</span>
-                      </li>
-                    ))}
+                    {insights.key_findings
+                      .filter(
+                        (finding) =>
+                          !finding.toLowerCase().includes("missing items")
+                      )
+                      .map((finding, index) => (
+                        <li key={index} className="flex gap-2">
+                          <span className="text-blue-500">•</span>
+                          <span className="text-sm">{finding}</span>
+                        </li>
+                      ))}
                   </ul>
                 </CardContent>
               </Card>
@@ -753,6 +784,17 @@ const ComparisonApp = () => {
         </Alert>
       )}
 
+      {loading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center space-y-4 w-[400px] h-[200px] flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="text-lg font-medium animate-pulse w-[300px]">
+              {loadingMessage}
+            </p>
+          </div>
+        </div>
+      )}
+
       {result && (
         <div className="mt-8 space-y-6">
           {/* Overall Summary Card */}
@@ -780,14 +822,14 @@ const ComparisonApp = () => {
                     {result.overall_summary.total_discrepancies}
                   </p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-sm text-gray-500">Cost Difference</p>
                   <p className="text-2xl font-bold">
                     {formatCurrency(
                       result.overall_summary.total_cost_difference
                     )}
                   </p>
-                </div>
+                </div> */}
                 <div>
                   <p className="text-sm text-gray-500">Average Difference</p>
                   <p className="text-2xl font-bold">

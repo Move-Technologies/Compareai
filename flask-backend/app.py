@@ -1,17 +1,20 @@
 from flask import Flask, request, jsonify
+import pdfplumber
+from pdfplumber.utils.text import extract_text
+import pandas as pd
+import re
 from flask_cors import CORS
-import os
+import logging
+from fuzzywuzzy import fuzz
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import openai
 from dotenv import load_dotenv
 import logging
-import pymupdf
-import json
 import re
 import pandas as pd
-from datetime import datetime
 from fuzzywuzzy import fuzz
-from typing import Dict
-import numpy as np
+from datetime import datetime
 
 load_dotenv()
 
@@ -20,31 +23,10 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+ALLOWED_EXTENSIONS = {'pdf'}
 
-# Remove or comment out this function since we're not using OCR
-# def setup_tesseract():
-#     """Configure Tesseract OCR path"""
-#     try:
-#         if 'TESSDATA_PREFIX' not in os.environ:
-#             unix_paths = [
-#                 '/usr/share/tessdata',
-#                 '/usr/local/share/tessdata',
-#                 '/app/.apt/usr/share/tessdata',
-#                 './tessdata'
-#             ]
-#             
-#             for path in unix_paths:
-#                 if os.path.exists(path):
-#                     os.environ['TESSDATA_PREFIX'] = path
-#                     break
-#             
-#             if 'TESSDATA_PREFIX' not in os.environ:
-#                 logger.warning("No Tesseract data path found. OCR might be limited.")
-#     except Exception as e:
-#         logger.error(f"Error setting up Tesseract: {str(e)}")
 
-# Remove this line since we're not using the setup function
-# setup_tesseract()
 
 UNIT_STANDARDIZATION = {
     'SF': 'square_feet',
@@ -58,7 +40,6 @@ UNIT_STANDARDIZATION = {
     'SQ': 'square' 
 }
 
-CATEGORIES = ['ACCESSORIES - MOBILE HOME', 'FLOOR COVERING - CARPET', 'OFFICE SUPPLIES', 'ORNAMENTAL IRON', 'PERSONAL CARE & BEAUTY', 'PERISHABLE - NON-PERISHABLE', 'PET & ANIMAL SUPPLIES', 'INTERIOR LATH & PLASTER', 'PLUMBING', 'PANELING & WOOD WALL FINISHES', 'PAINTING', 'SWIMMING POOLS & SPAS', 'ROOFING', 'SCAFFOLDING', 'SIDING', 'SOFFIT, FASCIA, & GUTTER', 'SPECIALTY ITEMS', 'SPORTING GOODS & OUTDOORS', 'STEEL JOIST COMPONENTS', 'STEEL COMPONENTS', 'STAIRS', 'STUCCO & EXTERIOR PLASTER', 'TOILET & BATH ACCESSORIES', 'TRAUMA/CRIME SCENE REMEDIATION', 'TILE', 'TIMBER FRAMING', 'TEMPORARY REPAIRS', 'TOOLS', 'TOYS & GAMES', 'USER DEFINED ITEMS', 'VALUATION TOOL COST', 'WINDOWS - ALUMINUM', 'WINDOWS - SLIDING PATIO DOORS', 'WINDOW REGLAZING & REPAIR', 'WINDOWS - SKYLIGHTS', 'WINDOW TREATMENT', 'WINDOWS - VINYL', 'WINDOWS - WOOD', 'WALLPAPER', 'WATER EXTRACTION & REMEDIATION', 'EXTERIOR STRUCTURES', 'AUTOMOTIVE & MOTORCYCLE ACC.', 'ANTIQUES & VINTAGE GOODS', 'APPLIANCES - MAJOR W/O INSTALL', 'APPLIANCES', 'APPLIANCES - SMALL', 'ART RESTORATION, CONSERVATION', 'ARTWORK', 'AWNINGS & PATIO COVERS', 'BUSINESS GOODS & EQUIPMENT', 'BOOKS, MAGAZINES & PERIODICALS', 'CABINETRY', 'CONT: CLEAN APPLIANCES', 'CASH & SECURITIES', 'CAMERAS, CAMCORDERS & EQUIP.', 'CONT: GARMENT & SOFT GOODS CLN', 'CONT: CLEAN ELECTRIC ITEMS', 'CONT: CLEAN - GENERAL ITEMS', 'CONT: CLEAN - HARD FURNITURE', 'CLOTHING & ACCESSORIES', 'CONT: CLEAN - LAMPS OR VASES', 'CLEANING', 'COMPUTERS & RELATED GOODS', 'CONCRETE & ASPHALT', 'CONTENT MANIPULATION', 'CONT: PACKING,HANDLNG,STORAGE', 'CREDIT', 'CONT: CLEAN, UPHOLSTERY & SOFT', 'CONT: CEILING/WALL HANGINGS', 'GENERAL DEMOLITION', 'DOCUMENTS & VALUABLE PAPERS', 'DOORS', 'DRYWALL', 'ELECTRONICS', 'ELECTRICAL', 'ELECTRICAL - SPECIAL SYSTEMS', 'MISC. EQUIPMENT - AGRICULTURAL', 'MISC. EQUIPMENT - COMMERCIAL', 'HEAVY EQUIPMENT', 'EXCAVATION', 'FLOOR COVERING - RESILIENT', 'FLOOR COVERING - STONE', 'FLOOR COVERING - CERAMIC TILE', 'FLOOR COVERING - VINYL', 'FLOOR COVERING - WOOD', 'FEES - CONTENTS MISC.', 'PERMITS AND FEES', 'FENCING', 'FINISH CARPENTRY / TRIMWORK', 'FINISH HARDWARE', 'FIREPLACES', 'FIRE PROTECTION SYSTEMS', 'FRAMING & ROUGH CARPENTRY', 'FURNITURE - HOME & OFFICE', 'GLASS, GLAZING, & STOREFRONTS', 'FIREARMS & ACCESSORIES', 'HOUSEWARES - DINING & FLATWARE', 'HEALTH & MEDICAL SUPPLIES', 'HAZARDOUS MATERIAL REMEDIATION', 'HOBBIES & COLLECTIBLES', 'HOUSEWARES - HOME DECOR', 'HEAT, VENT & AIR CONDITIONING', 'INFANT & BABY RELATED GOODS', 'INSULATION - MECHANICAL', 'JEWELRY & WATCHES', 'KITCHENWARE', 'LABOR ONLY', 'LAWN, GARDEN & PATIO', 'LINENS & SOFTGOODS', 'LIGHT FIXTURES', 'LANDSCAPING', 'LUGGAGE, BAGS & ACCESSORIES', 'MARBLE - CULTURED OR NATURAL', 'MUSIC, MOVIES & MEDIA', 'MOISTURE PROTECTION', 'MIRRORS & SHOWER DOORS', 'MOBILE HOMES, SKIRTING & SETUP', 'METAL STRUCTURES & COMPONENTS', 'MUSICAL INSTRUMENTS & EQUIP.']
 
 def create_category_patterns():
     """Create intuitive category patterns with comprehensive item associations"""
@@ -130,441 +111,372 @@ def create_category_patterns():
 
 CATEGORY_PATTERNS = create_category_patterns()
 
-# Create a list to track unknown units
-unknown_units = set()
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def normalize_line_items(items_list):
-    """Extract and normalize line items from list of dictionaries"""
-    try:
-        aggregated_items = {}
-        
-        # Process each item in the list
-        for item in items_list:
-            if not isinstance(item, dict):
-                logger.warning(f"Skipping invalid item (not a dictionary): {item}")
-                continue
-                
-            try:
-                description = item.get('description', '').strip()
-                if not description:
-                    continue
-                    
-                # Create normalized item
-                normalized_item = {
-                    'description': description,
-                    'quantity': float(item.get('quantity', 0)),
-                    'unit': item.get('unit', ''),
-                    'unit_cost': float(item.get('unit_cost', 0)),
-                    'tax': float(item.get('tax', 0)),
-                    'op': float(item.get('op', 0)),
-                    'rcv': float(item.get('rcv', 0)),
-                    'total_cost': float(item.get('rcv', 0)),
-                    'occurrences': [{
-                        'line_number': item.get('line_number', 0),
-                        'quantity': float(item.get('quantity', 0)),
-                        'rcv': float(item.get('rcv', 0)),
-                        'page_number': item.get('page_number', 1)
-                    }],
-                    'occurrence_summary': {
-                        'total_quantity': float(item.get('quantity', 0)),
-                        'total_rcv': float(item.get('rcv', 0)),
-                        'occurrences_detail': [
-                            f"Line {item.get('line_number', 0)} (Page {item.get('page_number', 1)}): "
-                            f"Qty={item.get('quantity', 0)}, RCV=${float(item.get('rcv', 0)):.2f}"
-                        ]
-                    }
-                }
-                
-                if description in aggregated_items:
-                    # Update existing item
-                    existing = aggregated_items[description]
-                    existing['quantity'] += normalized_item['quantity']
-                    existing['tax'] += normalized_item['tax']
-                    existing['op'] += normalized_item['op']
-                    existing['rcv'] += normalized_item['rcv']
-                    existing['total_cost'] += normalized_item['total_cost']
-                    existing['occurrences'].append(normalized_item['occurrences'][0])
-                    existing['occurrence_summary']['total_quantity'] += normalized_item['quantity']
-                    existing['occurrence_summary']['total_rcv'] += normalized_item['rcv']
-                    existing['occurrence_summary']['occurrences_detail'].append(
-                        normalized_item['occurrence_summary']['occurrences_detail'][0]
-                    )
-                else:
-                    aggregated_items[description] = normalized_item
-                    
-            except (ValueError, TypeError) as e:
-                logger.warning(f"Error processing item: {item}. Error: {str(e)}")
-                continue
-        
-        return list(aggregated_items.values())
-        
-    except Exception as e:
-        logger.error(f"Error normalizing line items: {str(e)}")
-        logger.error("Full traceback:", exc_info=True)
-        return []
+def process_pdf(pdf_file):
+    pdf = pdfplumber.open(pdf_file)
+    all_text = []
 
-def compare_line_items(items1, items2):
-    """Compare line items between two documents with occurrence tracking"""
-    try:
-        comparison_results = {
-            'all_items_comparison': [],
-            'cost_discrepancies': [],
-            'quantity_discrepancies': [],
-            'unique_to_doc1': [],
-            'unique_to_doc2': []
-        }
-        
-        # Compare items
-        for item1 in items1:
-            matched_item, match_ratio = find_best_match(item1['description'], items2)
-            
+    for page in pdf.pages:
+        chars = page.chars.copy()
+
+        for table in page.find_tables(table_settings={
+            "vertical_strategy": "text",
+            "horizontal_strategy": "lines",
+            "snap_tolerance": 3,
+            "join_tolerance": 3,
+            "edge_min_length": 3
+        }):
             try:
-                # Convert numeric values to float with explicit error handling
-                item1_quantity = float(item1['quantity'])
-                item1_cost = float(item1['total_cost'])
-            except (ValueError, TypeError) as e:
-                logger.error(f"Error converting item1 values: {e}")
-                logger.error(f"item1 quantity: {item1['quantity']}, cost: {item1['total_cost']}")
+                df = pd.DataFrame(table.extract())
+                if len(df) > 0:
+                    if df.iloc[0].isna().any():
+                        df.columns = df.iloc[1]
+                        df = df.drop([0, 1])
+                    else:
+                        df.columns = df.iloc[0]
+                        df = df.drop(0)
+                    
+                    df = df.fillna('')
+                    markdown = df.to_markdown(index=False)
+                    
+                    chars.append({
+                        "text": "\n" + markdown + "\n",
+                        "x0": table.bbox[0],
+                        "top": table.bbox[1],
+                        "x1": table.bbox[2],
+                        "bottom": table.bbox[3],
+                        "doctop": table.bbox[1],
+                        "upright": True,
+                        "size": 12,
+                        "width": table.bbox[2] - table.bbox[0]
+                    })
+
+            except Exception as e:
+                print(f"Error processing table: {e}")
                 continue
-            
-            if matched_item:
-                try:
-                    matched_quantity = float(matched_item['quantity'])
-                    matched_cost = float(matched_item['total_cost'])
-                    quantity_diff = item1_quantity - matched_quantity
-                    cost_diff = item1_cost - matched_cost
-                    percentage_diff = (cost_diff / item1_cost * 100) if item1_cost != 0 else 0
-                except (ValueError, TypeError) as e:
-                    logger.error(f"Error converting matched_item values: {e}")
-                    logger.error(f"matched quantity: {matched_item['quantity']}, cost: {matched_item['total_cost']}")
-                    continue
-            else:
-                matched_quantity = None
-                matched_cost = None
-                quantity_diff = None
-                cost_diff = None
-                percentage_diff = None
-            
-            comparison_entry = {
-                'description': item1['description'],
-                'doc1_quantity': item1_quantity,
-                'doc1_cost': item1_cost,
-                'unit': item1['unit'],
-                'doc1_occurrences': item1['occurrence_summary'],
-                'doc2_quantity': matched_quantity,
-                'doc2_cost': matched_cost,
-                'doc2_occurrences': matched_item['occurrence_summary'] if matched_item else None,
-                'quantity_difference': quantity_diff,
-                'cost_difference': cost_diff,
-                'percentage_cost_difference': percentage_diff,
-                'match_confidence': match_ratio
-            }
-            
-            comparison_results['all_items_comparison'].append(comparison_entry)
-            
-            if matched_item and cost_diff is not None:
-                if abs(cost_diff) > 0.01:
-                    comparison_results['cost_discrepancies'].append({
-                        'description': item1['description'],
-                        'doc1_cost': item1_cost,
-                        'doc2_cost': matched_cost,
-                        'difference': cost_diff,
-                        'match_confidence': match_ratio
-                    })
-                
-                if abs(quantity_diff) > 0.01:
-                    comparison_results['quantity_discrepancies'].append({
-                        'description': item1['description'],
-                        'doc1_quantity': item1_quantity,
-                        'doc2_quantity': matched_quantity,
-                        'difference': quantity_diff,
-                        'match_confidence': match_ratio
-                    })
-            else:
-                comparison_results['unique_to_doc1'].append(item1)
+
+        page_text = extract_text(chars, layout=True)
+        all_text.append(page_text)
+
+    pdf.close()
+    return "\n".join(all_text)
+
+def clean_item_number(item_number):
+    """
+    Extracts only the numerical part from an item number and adds a period.
+    Examples: 
+    'DD2WW59.' -> '259.'
+    'CClloosseett ((11))286.' -> '286.'
+    'BBeeddrroooomm 22 MM CClloosseett 516.' -> '516.'
+    'Room 2 516.' -> '516.'  # Now handles room numbers correctly
+    Rejects: 'LLaauunnddrryy RRoo 1oomm1 1. .4 43'
+    """
+    # Split at the period to get just the item number part
+    item_parts = item_number.split('.')
+    if not item_parts:
+        return None
+    
+    item_number_part = item_parts[0]
+    
+    # Check if there are numbers with spaces at the end of the string
+    if re.search(r'\d\s+\d+\s*$', item_number_part):
+        return None
         
-        return comparison_results
+    # First remove any parentheses and their contents
+    no_parentheses = re.sub(r'\([^)]*\)', '', item_number_part)
+    # Remove any scattered spaces
+    no_spaces = re.sub(r'\s+', '', no_parentheses)
+    
+    # Find all groups of consecutive digits
+    digit_groups = re.findall(r'\d+', no_spaces)
+    
+    if not digit_groups:
+        return None
         
-    except Exception as e:
-        logger.error(f"Error comparing line items: {str(e)}")
-        logger.error(f"Full traceback:", exc_info=True)
-        raise
+    # Take the last group of digits (usually the line number)
+    digits = digit_groups[-1]
+    
+    # Validation checks
+    if len(digits) > 4:  # Assuming line numbers won't be more than 4 digits
+        return None
+        
+    # Add period to the cleaned number
+    return f"{digits}."
 
 def parse_quantity(quantity_text):
-    """Parse quantity value from text that may include unit"""
+    """
+    Parse quantity value from text that may include unit.
+    Examples:
+    '1.00EA' -> 1.0
+    '10.5SF' -> 10.5
+    '100LF' -> 100.0
+    """
+    if quantity_text is None:
+        return 0.0
+        
     try:
-        match = re.match(r'^([\d,\.]+)', quantity_text.strip())
-        if match:
-            return float(match.group(1).replace(',', ''))
+        # Remove any units (EA, SF, LF, etc) and convert to float
+        quantity_str = re.match(r'^([\d,\.]+)', str(quantity_text).strip())
+        if quantity_str:
+            return float(quantity_str.group(1).replace(',', ''))
         return 0.0
     except (ValueError, AttributeError):
+        logger.warning(f"Could not parse quantity: {quantity_text}")
         return 0.0
 
-def extract_unit(quantity_text):
-    """Extract unit from quantity text"""
+def cleanup_line_item(item):
+    """
+    Post-process a line item to ensure properties are correctly populated and track occurrences
+    """
     try:
-        match = re.match(r'^\d+\.?\d*\s*([A-Za-z]+)', quantity_text.strip())
-        if match:
-            return match.group(1)
-        return ''
-    except (ValueError, AttributeError):
-        return ''
-
-def clean_numeric(value):
-    """Clean numeric values, handling currency and percentages"""
-    if not value:
-        return 0.0
-    try:
-        # Remove currency symbols, commas, spaces, and parentheses
-        value = str(value).replace('$', '').replace(',', '').replace(' ', '').strip('()')
-        # Remove percentage signs
-        value = value.replace('%', '')
-        return float(value)
-    except (ValueError, TypeError):
-        return 0.0
-
-def extract_text_from_pdf(pdf_file, doc_id):
-    """Extract tabular text from PDF file with structured column parsing"""
-    try:
-        pdf_file = pdf_file.read()
-        doc = pymupdf.open(stream=pdf_file, filetype="pdf")
-        line_items = []
+        # Combine notes into a single string for easier processing
+        notes_text = ' '.join(str(note) for note in item.get('notes', []))
         
-        # Define column headers and their approximate positions
-        columns = {
-            'quantity': (0, 70),    # QUANTITY column
-            'unit': (70, 120),      # UNIT column
-            'tax': (120, 170),      # TAX column
-            'op': (170, 220),       # O&P column
-            'rcv': (220, 270),      # RCV column
-            'age_life': (270, 320), # AGE/LIFE column
-            'cond': (320, 370),     # COND. column
-            'dep': (370, 420),      # DEP% column
-            'deprec': (420, 470),   # DEPREC. column
-            'acv': (470, 520)       # ACV column
-        }
+        # Initialize default values for required fields
+        item.setdefault('quantity', '0')
+        item.setdefault('rcv', '0')
+        item.setdefault('item_number', '0')
+        item.setdefault('page_number', 1)
+        item.setdefault('description', '')
+        item.setdefault('notes', [])
         
-        current_description = ""
-        line_number = 0
+        # Updated pattern to match the actual format in notes
+        quantity_pattern = r'''
+            (\d+\.?\d*(?:SF|EA|LF)?)\s+           # Quantity with optional unit
+            ([-\d,\.]+)\s+                         # Unit cost
+            ([-\d,\.]+)\s+                         # Tax
+            ([-\d,\.]+)\s+                         # O&P
+            ([-\d,\.]+)                           # RCV
+            (?:\s+(\d+/\d+|\d+/[A-Z]+|0/NA)\s+)?  # Optional AGE/LIFE
+            (?:yr\s+)?                            # Optional "yr"
+            (?:Avg\.\s+)?                         # Optional "Avg."
+            (?:(\d+)%)?                           # Optional Depreciation percentage
+        '''
         
-        for page_num in range(len(doc)):
-            page = doc[page_num]
-            blocks = page.get_text("dict")["blocks"]
-            
-            # Group text by y-position (row)
-            rows = {}
-            for block in blocks:
-                for line in block.get("lines", []):
-                    for span in line.get("spans", []):
-                        y = round(span["bbox"][1], 1)  # y-coordinate for row grouping
-                        x = span["bbox"][0]            # x-coordinate for column determination
-                        
-                        if y not in rows:
-                            rows[y] = []
-                        rows[y].append({
-                            'text': span['text'].strip(),
-                            'x': x,
-                            'width': span["bbox"][2] - x
-                        })
-            
-            # Process rows in order
-            sorted_rows = sorted(rows.items())
-            for y, spans in sorted_rows:
-                # Sort spans by x-coordinate
-                spans.sort(key=lambda s: s['x'])
-                row_text = ' '.join(s['text'] for s in spans)
+        # Check notes first, then description
+        for text in [notes_text, item['description']]:
+            quantity_match = re.search(quantity_pattern, text, re.VERBOSE)
+            if quantity_match and not item.get('quantity'):  # Only update if properties are empty
+                quantity = quantity_match.group(1)
                 
-                # Check if this is a quantity row (starts with a number)
-                if re.match(r'^\d+\.?\d*\s*[A-Za-z]+', row_text):
-                    line_number += 1
-                    # Parse row into columns
-                    row_data = {'line_number': line_number, 'page_number': page_num + 1}
-                    
-                    for span in spans:
-                        # Determine which column this text belongs to
-                        for col_name, (start_x, end_x) in columns.items():
-                            if start_x <= span['x'] < end_x:
-                                row_data[col_name] = span['text']
-                                break
-                    
-                    # Create line item with current description
-                    if current_description:
-                        item = {
-                            'description': current_description,
-                            'quantity': parse_quantity(row_data.get('quantity', '')),
-                            'unit': extract_unit(row_data.get('quantity', '')),
-                            'tax': clean_numeric(row_data.get('tax', '0')),
-                            'op': clean_numeric(row_data.get('op', '0')),
-                            'rcv': clean_numeric(row_data.get('rcv', '0')),
-                            'age_life': row_data.get('age_life', ''),
-                            'condition': row_data.get('cond', ''),
-                            'depreciation': clean_numeric(row_data.get('dep', '0').rstrip('%')),
-                            'deprec_value': clean_numeric(row_data.get('deprec', '0')),
-                            'acv': clean_numeric(row_data.get('acv', '0')),
-                            'line_number': row_data['line_number'],
-                            'page_number': row_data['page_number']
-                        }
-                        line_items.append(item)
+                # Extract unit type from quantity
+                unit_type = re.search(r'(SF|EA|LF)$', quantity)
+                unit = unit_type.group(1) if unit_type else 'EA'
+                # Remove unit from quantity if present
+                quantity = re.sub(r'(SF|EA|LF)$', '', quantity)
                 
-                # If row doesn't start with a number and isn't a header row,
-                # treat it as a potential description
-                elif not any(header in row_text.upper() for header in ['QUANTITY', 'UNIT', 'TAX', 'O&P', 'RCV']):
-                    current_description = row_text.strip()
-        
-        logger.info(f"Successfully extracted {len(line_items)} items from document {doc_id}")
-        return line_items
-        
-    except Exception as e:
-        logger.error(f"Error extracting text: {str(e)}")
-        logger.error("Full traceback:", exc_info=True)
-        raise
-
-def create_analysis_ready_dataframe(comparison_results):
-    """Convert comparison results into an analysis-friendly format"""
-    try:
-        df = pd.DataFrame(comparison_results['all_items_comparison'])
-        
-        # Convert numeric columns to float type
-        numeric_columns = [
-            'doc1_quantity', 'doc2_quantity',
-            'doc1_cost', 'doc2_cost',
-            'cost_difference', 'quantity_difference',
-            'percentage_cost_difference'
-        ]
-        
-        for col in numeric_columns:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-        
-        # Add derived columns
-        df['category'] = df['description'].apply(categorize_item)
-        df['standardized_unit'] = df['unit'].apply(lambda x: UNIT_STANDARDIZATION.get(x, x))
-        df['is_temporary'] = df['description'].str.contains('Temporary', case=False)
-        df['is_labor'] = df['description'].str.contains('labor|hour|technician|supervisor', case=False)
-        
-        # Calculate significant difference
-        df['significant_difference'] = df['percentage_cost_difference'].apply(
-            lambda x: abs(x) > 5 if pd.notnull(x) else False
-        )
-        
-        # Remove file saving operation since we're on a read-only filesystem
-        # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        # csv_filename = f'enriched_comparison_{timestamp}.csv'
-        # df.to_csv(csv_filename, index=False)
-        
-        return df
-    except Exception as e:
-        logger.error(f"Error creating analysis-ready dataframe: {str(e)}")
-        raise
-
-
-
-def process_comparison_result(comparison_json):
-    """Process and format the comparison result for better presentation"""
-    try:
-        # Add additional processing here if needed
-        return comparison_json
-    except Exception as e:
-        logger.error(f"Error processing comparison result: {str(e)}")
-        raise
-
-def categorize_item(description):
-    """Categorize items based on common terminology and associations"""
-    matches = []
-    for category, pattern in CATEGORY_PATTERNS.items():
-        if re.search(pattern, description):
-            matches.append(category)
-    
-    # Return the first match, or 'UNCATEGORIZED' if no matches
-    return matches[0] if matches else 'UNCATEGORIZED'
-
-def clean_numeric_values(value):
-    """Preserve numeric values by converting numpy types to Python native types"""
-    if isinstance(value, (np.int64, np.float64)):
-        return float(value) if np.isfinite(value) else str(value)
-    return value
-
-def create_category_summary(items):
-    """Create summary statistics for a category of items"""
-    total_items = len(items)
-    total_cost_diff = 0
-    items_with_discrepancies = 0
-    valid_items = 0  # Counter for items with valid cost differences
-
-    # Calculate values only for items with valid cost differences
-    for item in items:
-        cost_diff = item.get('cost_difference')
-        if cost_diff is not None and not pd.isna(cost_diff):  # Check for both None and nan
-            cost_diff = float(cost_diff)
-            total_cost_diff += cost_diff
-            valid_items += 1
-            if abs(cost_diff) > 0:
-                items_with_discrepancies += 1
-
-    # Calculate average only using valid items
-    avg_cost_diff = total_cost_diff / valid_items if valid_items > 0 else 0
-
-    return {
-        'total_items': int(total_items),
-        'total_cost_difference': float(round(total_cost_diff, 2)),
-        'average_cost_difference': float(round(avg_cost_diff, 2)),
-        'items_with_discrepancies': int(items_with_discrepancies)
-    }
-
-def prepare_categorized_items(analysis_df, comparison_results):
-    categorized_items = {}
-    
-    for category, group in analysis_df.groupby('category'):
-        items = []
-        for _, row in group.iterrows():
-            item_data = {
-                'description': row['description'],
-                'doc1_quantity': row['doc1_quantity'],
-                'doc2_quantity': row['doc2_quantity'],
-                'doc1_cost': row['doc1_cost'],
-                'doc2_cost': row['doc2_cost'],
-                'unit': row['unit'],
-                'cost_difference': row['cost_difference'],
-                'percentage_difference': row['percentage_cost_difference'],
-                'is_labor': row['is_labor'],
-                'is_temporary': row['is_temporary'],
-                'doc1_occurrences': row.get('doc1_occurrences'),
-                'doc2_occurrences': row.get('doc2_occurrences'),
-                'match_confidence': row.get('match_confidence', 0),
-            }
-            
-            # Add additional fields from all_items_data if it exists
-            all_items_data = next(
-                (item for item in comparison_results['all_items_comparison'] 
-                 if item['description'] == row['description']),
-                None
-            )
-            
-            if all_items_data:
-                item_data.update({
-                    'quantity': all_items_data.get('quantity'),
-                    'unit_cost': all_items_data.get('unit_cost'),
-                    'tax': all_items_data.get('tax'),
-                    'op': all_items_data.get('op'),
-                    'rcv': all_items_data.get('rcv'),
-                    'total_cost': all_items_data.get('total_cost'),
-                    'occurrences': all_items_data.get('occurrences', []),
-                    'occurrence_count': all_items_data.get('occurrence_count', 0),
-                    'occurrence_summary': all_items_data.get('occurrence_summary', {
-                        'total_quantity': 0,
-                        'total_rcv': 0,
-                        'occurrences_detail': []
-                    })
+                item.update({
+                    'quantity': quantity.strip() or '0',
+                    'unit': unit,
+                    'unit_cost': quantity_match.group(2).replace(',', '') or '0',
+                    'tax': quantity_match.group(3).replace(',', '') or '0',
+                    'o&p': quantity_match.group(4).replace(',', '') or '0',
+                    'rcv': quantity_match.group(5).replace(',', '') or '0',
+                    'age_life': quantity_match.group(6) if quantity_match.group(6) else 'N/A',
+                    'dep_percent': quantity_match.group(7) if quantity_match.group(7) else '0'
                 })
-            
-            items.append(item_data)
+                
+                # Calculate depreciation and ACV if we have RCV and dep_percent
+                try:
+                    rcv = float(item['rcv'])
+                    dep_percent = float(item['dep_percent'])
+                    depreciation = rcv * (dep_percent / 100)
+                    acv = rcv - depreciation
+                    
+                    item.update({
+                        'depreciation': f"{depreciation:.2f}",
+                        'acv': f"{acv:.2f}"
+                    })
+                except (ValueError, TypeError):
+                    item.update({
+                        'depreciation': '0.00',
+                        'acv': '0.00'
+                    })
         
-        categorized_items[category] = {
-            'items': items,
-            'summary': create_category_summary(items)
+        # Add occurrence tracking
+        if not item.get('occurrences'):
+            item['occurrences'] = []
+        
+        # Add current occurrence with proper quantity parsing and error handling
+        try:
+            occurrence = {
+                'line_number': str(item.get('item_number', '0')),
+                'quantity': parse_quantity(item.get('quantity', '0')),
+                'rcv': float(str(item.get('rcv', '0')).replace(',', '') or '0'),
+                'page_number': int(item.get('page_number', 1))
+            }
+        except (ValueError, TypeError):
+            occurrence = {
+                'line_number': '0',
+                'quantity': 0.0,
+                'rcv': 0.0,
+                'page_number': 1
+            }
+        
+        item['occurrences'].append(occurrence)
+        
+        # Calculate totals for all occurrences
+        try:
+            total_quantity = sum(occ['quantity'] for occ in item['occurrences'])
+            total_rcv = sum(occ['rcv'] for occ in item['occurrences'])
+        except (ValueError, TypeError):
+            total_quantity = 0.0
+            total_rcv = 0.0
+        
+        # Add occurrence summary
+        item['occurrence_summary'] = {
+            'total_quantity': total_quantity,
+            'total_rcv': total_rcv,
+            'occurrences_detail': [
+                f"Line {occ['line_number']} (Page {occ['page_number']}): "
+                f"Qty={occ['quantity']}, RCV=${float(occ['rcv']):.2f}"
+                for occ in item['occurrences']
+            ]
         }
+        
+        return item
+        
+    except Exception as e:
+        logger.error(f"Error in cleanup_line_item: {str(e)}")
+        # Return a safe default item
+        return {
+            'description': item.get('description', ''),
+            'quantity': '0',
+            'unit': 'EA',
+            'rcv': '0',
+            'occurrences': [],
+            'occurrence_summary': {
+                'total_quantity': 0.0,
+                'total_rcv': 0.0,
+                'occurrences_detail': []
+            }
+        }
+
+def parse_line_items(text):
+    """Parse line items with page number tracking"""
+    line_items = []
     
-    return categorized_items
+    # Updated pattern to be more strict about line endings
+    line_pattern = r'^\s*(?!.*(?:\.\s+\.\s+\d|\d\s+\.\s+\d))([A-Za-z0-9()\s]*?\d+[A-Za-z]*)\.\s+(.*?)(?:\s*\*)?$'
+    
+    # Updated quantity pattern to be more strict about number formats
+    quantity_pattern = r'''^\s*
+        (?!.*\b\d+\s+\d+\s+\d+\b)              # Negative lookahead to prevent matching scattered numbers
+        (\d+\.?\d*(?:\s*[A-Z]{1,3})?)\s+      # Quantity with optional unit (allowing space)
+        ([-\d,\.]+)\s+                         # Unit cost
+        ([-\d,\.]+)\s+                         # Tax
+        ([-\d,\.]+)\s+                         # O&P
+        ([-\d,\.]+)\s+                         # RCV
+        (?:(\d+/(?:NA|[A-Z]+))\s+)?           # Optional AGE/LIFE (now handles "NA")
+        (?:Avg\.\s+)?                          # Optional "Avg."
+        (\d+)%\s+                              # Depreciation percentage
+        (?:\[[A-Z]\]\s+)?                      # Optional [M] or other bracketed letter
+        \(([^)]+)\)\s+                         # Depreciation amount in parentheses
+        ([-\d,\.]+)                           # ACV
+    '''
+    
+    headers = {'QUANTITY', 'UNIT', 'TAX', 'O&P', 'RCV', 'AGE/LIFE', 'COND.', 'DEP %', 'DEPREC.', 'ACV'}
+    
+    lines = text.split('\n')
+    i = 0
+    current_item = None
+    current_page = 1
+    
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        # Check for page markers
+        page_match = re.search(r'Page:\s*(\d+)', line)
+        if page_match:
+            current_page = int(page_match.group(1))
+            i += 1
+            continue
+            
+        # Skip empty lines and headers
+        if not line or any(header in line for header in headers):
+            i += 1
+            continue
+            
+        # Check for page markers or totals
+        if 'Page:' in line or line.startswith('Totals:'):
+            i += 1
+            continue
+        
+        # Try to match a new line item
+        match = re.match(line_pattern, line)
+        if match:
+            raw_item_number = match.group(1)
+            cleaned_item_number = clean_item_number(raw_item_number)
+            
+            # Skip this item if cleaning returned None
+            if cleaned_item_number is None:
+                i += 1
+                continue
+                
+            # If we have a current item, append it before starting new one
+            if current_item:
+                line_items.append(current_item)
+                
+            description = match.group(2).strip()
+            current_item = {
+                'item_number': cleaned_item_number,
+                'raw_item_number': raw_item_number, 
+                'description': description,
+                'quantity': None,
+                'unit_cost': None,
+                'tax': None,
+                'o&p': None,
+                'rcv': None,
+                'age_life': None,
+                'dep_percent': None,
+                'depreciation': None,
+                'acv': None,
+                'notes': [],
+                'page_number': current_page
+            }
+            i += 1
+            continue
+            
+        # Try to match quantity line
+        quantity_match = re.match(quantity_pattern, line, re.VERBOSE)
+        if current_item and quantity_match:
+            current_item.update({
+                'quantity': quantity_match.group(1),
+                'unit_cost': quantity_match.group(2).replace(',', ''),
+                'tax': quantity_match.group(3).replace(',', ''),
+                'o&p': quantity_match.group(4).replace(',', ''),
+                'rcv': quantity_match.group(5).replace(',', ''),
+                'age_life': quantity_match.group(6) if quantity_match.group(6) else 'N/A',
+                'dep_percent': quantity_match.group(7),
+                'depreciation': quantity_match.group(8).replace(',', ''),
+                'acv': quantity_match.group(9).replace(',', '')
+            })
+            
+            # Extract unit type from quantity if present
+            unit_type = re.search(r'[A-Z]{2,}$', quantity_match.group(1))
+            current_item['unit'] = unit_type.group(0) if unit_type else 'EA'
+            
+            i += 1
+            continue
+            
+        # If line doesn't match quantity pattern and we have a current item,
+        # treat it as a note
+        if current_item and line:
+            current_item['notes'].append(line)
+        
+        i += 1
+    
+    # Don't forget to append the last item
+    if current_item:
+        current_item = cleanup_line_item(current_item)
+        line_items.append(current_item)
+    
+    # Clean up all items one final time
+    line_items = [cleanup_line_item(item) for item in line_items]
+    
+    return line_items
 
 def extract_specifications(description: str) -> dict:
     """
@@ -675,14 +587,221 @@ def find_best_match(description: str, items_list: list, threshold: float = 80) -
         logger.error(f"Error in find_best_match: {str(e)}")
         return (None, 0)
 
+def extract_numeric_value(value_str):
+    """Extract numeric value from strings like '8.00MO' or '120.00LF'"""
+    if not value_str or pd.isna(value_str):
+        return 0.0
+    try:
+        # Extract numeric part using regex
+        match = re.match(r'^([-+]?\d*\.?\d+)', str(value_str))
+        if match:
+            return float(match.group(1))
+        return 0.0
+    except (ValueError, TypeError):
+        return 0.0
+
+def extract_unit(value_str):
+    """Extract unit from strings like '8.00MO' or '120.00LF'"""
+    if not value_str or pd.isna(value_str):
+        return 'EA'  # Default unit
+    try:
+        # Extract unit part using regex
+        match = re.search(r'[A-Za-z]+$', str(value_str))
+        if match:
+            return match.group(0).upper()
+        return 'EA'  # Default unit
+    except (ValueError, TypeError):
+        return 'EA'  # Default unit
+
+def compare_line_items(items1, items2):
+    """Compare line items with occurrence tracking"""
+    comparison_results = {
+        'all_items_comparison': [],
+        'cost_discrepancies': [],
+        'quantity_discrepancies': [],
+        'unique_to_doc1': [],
+        'unique_to_doc2': []
+    }
+    
+    # Compare items
+    for item1 in items1:
+        matched_item, match_ratio = find_best_match(item1['description'], items2)
+        
+        try:
+            # Extract numeric values and units
+            item1_quantity = extract_numeric_value(item1.get('quantity', 0))
+            item1_unit = extract_unit(item1.get('quantity', 'EA'))
+            item1_cost = float(item1.get('rcv', 0)) # Use RCV as cost if total_cost not available
+            
+            if matched_item:
+                matched_quantity = extract_numeric_value(matched_item.get('quantity', 0))
+                matched_unit = extract_unit(matched_item.get('quantity', 'EA'))
+                matched_cost = float(matched_item.get('rcv', 0))
+                
+                quantity_diff = item1_quantity - matched_quantity if item1_unit == matched_unit else None
+                cost_diff = item1_cost - matched_cost
+                percentage_diff = (cost_diff / item1_cost * 100) if item1_cost != 0 else 0
+            else:
+                matched_quantity = None
+                matched_unit = None
+                matched_cost = None
+                quantity_diff = None
+                cost_diff = None
+                percentage_diff = None
+            
+            comparison_entry = {
+                'description': item1['description'],
+                'doc1_quantity': item1_quantity,
+                'doc2_quantity': matched_quantity,
+                'unit': item1_unit,
+                'doc1_cost': item1_cost,
+                'doc2_cost': matched_cost,
+                'doc1_occurrences': item1.get('occurrence_summary', {
+                    'total_quantity': 0,
+                    'total_rcv': 0,
+                    'occurrences_detail': []
+                }),
+                'doc2_occurrences': matched_item.get('occurrence_summary', {
+                    'total_quantity': 0,
+                    'total_rcv': 0,
+                    'occurrences_detail': []
+                }) if matched_item else None,
+                'quantity_difference': quantity_diff,
+                'cost_difference': cost_diff,
+                'percentage_cost_difference': percentage_diff,
+                'match_confidence': match_ratio
+            }
+            
+            comparison_results['all_items_comparison'].append(comparison_entry)
+            
+            if matched_item and cost_diff is not None:
+                if abs(cost_diff) > 0.01:
+                    comparison_results['cost_discrepancies'].append({
+                        'description': item1['description'],
+                        'doc1_cost': item1_cost,
+                        'doc2_cost': matched_cost,
+                        'difference': cost_diff,
+                        'match_confidence': match_ratio
+                    })
+                
+                if quantity_diff is not None and abs(quantity_diff) > 0.01:
+                    comparison_results['quantity_discrepancies'].append({
+                        'description': item1['description'],
+                        'doc1_quantity': item1_quantity,
+                        'doc2_quantity': matched_quantity,
+                        'unit': item1_unit,
+                        'difference': quantity_diff,
+                        'match_confidence': match_ratio
+                    })
+            else:
+                comparison_results['unique_to_doc1'].append(item1)
+                
+        except Exception as e:
+            logger.error(f"Error processing item: {str(e)}")
+            logger.error(f"Item details: {item1}")
+            continue
+    
+    # Find items unique to doc2
+    matched_descriptions = {item['description'] for item in comparison_results['all_items_comparison']}
+    comparison_results['unique_to_doc2'] = [
+        item for item in items2 
+        if item['description'] not in matched_descriptions
+    ]
+    
+    return comparison_results
+
+def create_category_summary(items):
+    """Create summary statistics for a category of items"""
+    total_items = len(items)
+    total_cost_diff = 0
+    items_with_discrepancies = 0
+    valid_items = 0  # Counter for items with valid cost differences
+
+    # Calculate values only for items with valid cost differences
+    for item in items:
+        cost_diff = item.get('cost_difference')
+        if cost_diff is not None and not pd.isna(cost_diff):  # Check for both None and nan
+            cost_diff = float(cost_diff)
+            total_cost_diff += cost_diff
+            valid_items += 1
+            if abs(cost_diff) > 0:
+                items_with_discrepancies += 1
+
+    # Calculate average only using valid items
+    avg_cost_diff = total_cost_diff / valid_items if valid_items > 0 else 0
+
+    return {
+        'total_items': int(total_items),
+        'total_cost_difference': float(round(total_cost_diff, 2)),
+        'average_cost_difference': float(round(avg_cost_diff, 2)),
+        'items_with_discrepancies': int(items_with_discrepancies)
+    }
+
+def prepare_categorized_items(analysis_df, comparison_results):
+    """Prepare items categorized by type with summaries"""
+    categorized_items = {}
+    
+    for category, group in analysis_df.groupby('category'):
+        items = []
+        for _, row in group.iterrows():
+            item_data = {
+                'description': row['description'],
+                'doc1_quantity': float(row['doc1_quantity']) if pd.notnull(row['doc1_quantity']) else None,
+                'doc2_quantity': float(row['doc2_quantity']) if pd.notnull(row['doc2_quantity']) else None,
+                'doc1_cost': float(row['doc1_cost']) if pd.notnull(row['doc1_cost']) else None,
+                'doc2_cost': float(row['doc2_cost']) if pd.notnull(row['doc2_cost']) else None,
+                'unit': row['unit'],
+                'cost_difference': float(row['cost_difference']) if pd.notnull(row['cost_difference']) else None,
+                'percentage_difference': float(row['percentage_cost_difference']) if pd.notnull(row['percentage_cost_difference']) else None,
+                'is_labor': bool(row['is_labor']),
+                'is_temporary': bool(row['is_temporary']),
+                'doc1_occurrences': row.get('doc1_occurrences'),
+                'doc2_occurrences': row.get('doc2_occurrences'),
+                'match_confidence': float(row.get('match_confidence', 0)),
+            }
+            
+            # Add additional fields from all_items_data if it exists
+            all_items_data = next(
+                (item for item in comparison_results['all_items_comparison'] 
+                 if item['description'] == row['description']),
+                None
+            )
+            
+            if all_items_data:
+                additional_data = {
+                    'quantity': float(all_items_data.get('quantity')) if all_items_data.get('quantity') is not None else None,
+                    'unit_cost': float(all_items_data.get('unit_cost')) if all_items_data.get('unit_cost') is not None else None,
+                    'tax': float(all_items_data.get('tax')) if all_items_data.get('tax') is not None else None,
+                    'op': float(all_items_data.get('op')) if all_items_data.get('op') is not None else None,
+                    'rcv': float(all_items_data.get('rcv')) if all_items_data.get('rcv') is not None else None,
+                    'total_cost': float(all_items_data.get('total_cost')) if all_items_data.get('total_cost') is not None else None,
+                    'occurrences': all_items_data.get('occurrences', []),
+                    'occurrence_count': int(all_items_data.get('occurrence_count', 0)),
+                    'occurrence_summary': all_items_data.get('occurrence_summary', {
+                        'total_quantity': 0,
+                        'total_rcv': 0,
+                        'occurrences_detail': []
+                    })
+                }
+                item_data.update(additional_data)
+            
+            items.append(item_data)
+        
+        categorized_items[category] = {
+            'items': items,
+            'summary': create_category_summary(items)
+        }
+    
+    return categorized_items
+
 def create_overall_summary(analysis_df):
     """Create summary statistics for the entire comparison"""
     return {
         'total_items': len(analysis_df),
         'total_discrepancies': len(analysis_df[analysis_df['cost_difference'].abs() > 0]),
-        'total_cost_difference': analysis_df['cost_difference'].sum(),
-        'average_difference_percentage': analysis_df['percentage_cost_difference'].mean(),
-        'categories_affected': analysis_df['category'].nunique()
+        'total_cost_difference': float(analysis_df['cost_difference'].sum()),  # Convert numpy float to Python float
+        'average_difference_percentage': float(analysis_df['percentage_cost_difference'].mean()),
+        'categories_affected': int(analysis_df['category'].nunique())  # Convert numpy int to Python int
     }
 
 def generate_ai_insights(analysis_df):
@@ -706,8 +825,8 @@ def generate_ai_insights(analysis_df):
 
     insights = {
         'summary': {
-            'total_underpaid_amount': abs(total_discrepancy) if total_discrepancy < 0 else 0,
-            'number_of_underpaid_items': len(underpaid_items),
+            'total_underpaid_amount': float(abs(total_discrepancy)) if total_discrepancy < 0 else 0,
+            'number_of_underpaid_items': int(len(underpaid_items)),
             'largest_discrepancies': major_discrepancies.nlargest(5, 'cost_difference').to_dict('records')
         },
         'key_findings': [
@@ -731,7 +850,7 @@ def generate_ai_insights(analysis_df):
                 'priority': 'High',
                 'action': 'Discussion Points',
                 'details': [
-                    f'Focus on the top 5 discrepancies totaling ${abs(major_discrepancies["cost_difference"].sum()):.2f}',
+                    f'Focus on the top 5 discrepancies totaling ${abs(float(major_discrepancies["cost_difference"].sum())):.2f}',
                     'Request line-by-line review of labor rates',
                     'Address any missing items from the carrier\'s estimate'
                 ]
@@ -757,7 +876,7 @@ def _analyze_labor_discrepancies(labor_df):
     if len(labor_df) == 0:
         return "No significant labor cost discrepancies found."
     
-    total_labor_diff = labor_df['cost_difference'].sum()
+    total_labor_diff = float(labor_df['cost_difference'].sum())
     return (f"Found ${abs(total_labor_diff):.2f} in labor cost discrepancies. "
             "Key issues include rate differences and missing labor operations.")
 
@@ -766,7 +885,7 @@ def _analyze_material_discrepancies(material_df):
     if len(material_df) == 0:
         return "No significant material cost discrepancies found."
     
-    total_material_diff = material_df['cost_difference'].sum()
+    total_material_diff = float(material_df['cost_difference'].sum())
     return (f"Found ${abs(total_material_diff):.2f} in material cost discrepancies. "
             "Focus on quantity differences and unit price variations.")
 
@@ -776,7 +895,7 @@ def _analyze_missing_items(df):
     if len(missing_items) == 0:
         return "No missing items identified."
     
-    total_missing = missing_items['doc1_cost'].sum()
+    total_missing = float(missing_items['doc1_cost'].sum())
     return (f"Identified {len(missing_items)} items totaling ${total_missing:.2f} "
             "that are missing from the carrier's estimate.")
 
@@ -805,7 +924,7 @@ def _generate_negotiation_strategy(df):
 
 def _calculate_recoverable_amount(df):
     """Calculate potentially recoverable amount with confidence levels"""
-    total_diff = df['cost_difference'].sum()
+    total_diff = float(df['cost_difference'].sum())
     if total_diff >= 0:
         return {
             'amount': 0,
@@ -813,15 +932,15 @@ def _calculate_recoverable_amount(df):
             'note': 'No underpayment identified'
         }
     
-    high_confidence = df[
+    high_confidence = float(df[
         (df['cost_difference'] < 0) & 
         (df['match_confidence'] > 80)
-    ]['cost_difference'].sum()
+    ]['cost_difference'].sum())
     
-    medium_confidence = df[
+    medium_confidence = float(df[
         (df['cost_difference'] < 0) & 
         (df['match_confidence'].between(50, 80))
-    ]['cost_difference'].sum()
+    ]['cost_difference'].sum())
     
     return {
         'total_potential': abs(total_diff),
@@ -836,6 +955,60 @@ def _calculate_recoverable_amount(df):
             'Consider cost-benefit of pursuing low-confidence items'
         ]
     }
+
+def categorize_item(description):
+    """Categorize items based on common terminology and associations"""
+    matches = []
+    for category, pattern in CATEGORY_PATTERNS.items():
+        if re.search(pattern, description):
+            matches.append(category)
+    
+    # Return the first match, or 'UNCATEGORIZED' if no matches
+    return matches[0] if matches else 'UNCATEGORIZED'
+
+
+def create_analysis_ready_dataframe(comparison_results):
+    """Convert comparison results into an analysis-friendly format"""
+    try:
+        df = pd.DataFrame(comparison_results['all_items_comparison'])
+        
+        # Ensure required columns exist
+        if 'unit' not in df.columns:
+            df['unit'] = 'EA'  # Default unit if missing
+        
+        # Convert numeric columns to float type
+        numeric_columns = [
+            'doc1_quantity', 'doc2_quantity',
+            'doc1_cost', 'doc2_cost',
+            'cost_difference', 'quantity_difference',
+            'percentage_cost_difference'
+        ]
+        
+        for col in numeric_columns:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Add derived columns
+        df['category'] = df['description'].apply(lambda x: categorize_item(x) if x else 'UNKNOWN')
+        df['standardized_unit'] = df['unit'].apply(lambda x: UNIT_STANDARDIZATION.get(x, x))
+        df['is_temporary'] = df['description'].str.contains('Temporary', case=False, na=False)
+        df['is_labor'] = df['description'].str.contains('labor|hour|technician|supervisor', case=False, na=False)
+        
+        # Calculate significant difference
+        df['significant_difference'] = df['percentage_cost_difference'].apply(
+            lambda x: abs(x) > 5 if pd.notnull(x) else False
+        )
+        
+        return df
+    except Exception as e:
+        logger.error(f"Error creating analysis-ready dataframe: {str(e)}")
+        raise
+
+def extract_text_from_pdf(file, doc_id):
+    """Extract text and parse line items from PDF file"""
+    text = process_pdf(file)
+    items = parse_line_items(text)
+    return items
 
 @app.route('/api/compare', methods=['POST'])
 def compare_pdfs():
@@ -853,36 +1026,59 @@ def compare_pdfs():
         logger.info("Received comparison request")
         
         # Extract and compare documents
-        comparison_results = compare_documents(file1, file2)  # No tuple unpacking
+        doc1_items = extract_text_from_pdf(file1, 'doc1')
+        doc2_items = extract_text_from_pdf(file2, 'doc2')
         
-        return jsonify(comparison_results)
-        
-    except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-def compare_documents(doc1_file, doc2_file):
-    """Compare two PDF documents"""
-    try:
-        # Extract items from both documents
-        doc1_items = extract_text_from_pdf(doc1_file, 'doc1')
-        doc2_items = extract_text_from_pdf(doc2_file, 'doc2')
-        
-        # Normalize items
-        items1 = normalize_line_items(doc1_items)  # No tuple unpacking
-        items2 = normalize_line_items(doc2_items)  # No tuple unpacking
-        
-        # Compare normalized items
-        comparison_results = compare_line_items(items1, items2)
+        # Compare items
+        comparison_results = compare_line_items(doc1_items, doc2_items)
         
         # Create analysis dataframe
         analysis_df = create_analysis_ready_dataframe(comparison_results)
         
-        return comparison_results
+        # Generate insights and summaries
+        categorized_items = prepare_categorized_items(analysis_df, comparison_results)
+        overall_summary = create_overall_summary(analysis_df)
+        ai_insights = generate_ai_insights(analysis_df)
+        
+        # Prepare response
+        response = {
+            'comparison_results': comparison_results,
+            'categorized_items': categorized_items,
+            'overall_summary': overall_summary,
+            'ai_insights': ai_insights,
+            'file1_count': len(doc1_items),
+            'file2_count': len(doc2_items),
+            'metadata': {
+                'file1_name': file1.filename,
+                'file2_name': file2.filename,
+                'comparison_date': datetime.now().isoformat()
+            }
+        }
+        
+        return jsonify(response)
         
     except Exception as e:
         logger.error(f"Error processing request: {str(e)}")
-        raise
+        return jsonify({
+            'error': str(e),
+            'comparison_results': {},
+            'categorized_items': {},
+            'overall_summary': {
+                'total_items': 0,
+                'total_discrepancies': 0,
+                'total_cost_difference': 0,
+                'average_difference_percentage': 0,
+                'categories_affected': 0
+            },
+            'ai_insights': {},
+            'file1_count': 0,
+            'file2_count': 0,
+            'metadata': {
+                'file1_name': '',
+                'file2_name': '',
+                'comparison_date': datetime.now().isoformat()
+            }
+        }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)

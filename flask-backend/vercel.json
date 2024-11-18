@@ -2,12 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "app_2.py",
+      "src": "app.py",
       "use": "@vercel/python",
       "config": { "maxDuration": 60 }
     }
   ],
-  "routes": [{ "src": "/(.*)", "dest": "/app_2.py" }],
+  "routes": [{ "src": "/(.*)", "dest": "/app.py" }],
   "env": {
     "TESSDATA_PREFIX": "/app/.apt/usr/share/tessdata"
   }
