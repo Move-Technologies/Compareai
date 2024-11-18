@@ -1,0 +1,822 @@
+description,doc1_quantity,doc1_cost,unit,doc2_quantity,doc2_cost,quantity_difference,cost_difference,match_confidence,category,standardized_unit,is_temporary,is_labor,duration_type,percentage_cost_difference,significant_difference,price_category
+R&R Board-up windows and doors,615.46,3080.56,SF,,,,,0,WINDOWS,square_feet,False,False,,,False,High
+Install Board-up windows and doors,512.88,1040.13,SF,,,,,0,WINDOWS,square_feet,False,False,,,False,High
+Temporary fencing - 9+ months (per month),1080.0,777.6,LF,120.0,122.4,960.0,655.2,94,TEMPORARY ITEMS,linear_feet,True,False,per month,84.26,True,High
+Residential Supervision / Project Management - per hour,240.0,23474.88,HR,240.0,26951.04,0.0,-3476.16,100,SUPERVISION & MANAGEMENT,hours,False,True,,-14.81,True,High
+"Dumpster load - Approx. 20 yards, 4 tons of debris",1.0,1071.6,EA,2.0,3061.58,-1.0,-1989.98,94,DUMPSTER & DEBRIS,each,False,False,,-185.7,True,High
+Gas/water line cap/plug - per cap,21.0,594.81,EA,,,,,0,PLUMBING,each,False,False,,,False,Medium-High
+Plumbing/gas line air pressure test,2.0,681.48,EA,1.0,344.48,1.0,337.0,100,PLUMBING,each,False,False,,49.45,True,High
+Plumbing/drain line water pressure test,1.0,809.24,EA,1.0,818.08,0.0,-8.840000000000032,100,PLUMBING,each,False,False,,-1.09,False,High
+Scaffolding Setup & Take down - per hour,32.0,2492.92,HR,,,,,0,SCAFFOLDING,hours,False,True,,,False,High
+Scaffold - per section (per month),30.0,4063.68,MO,94.5,12800.6,-64.5,-8736.92,100,SCAFFOLDING,months,False,False,per month,-215.0,True,High
+Temporary hand washing station (per month),8.0,2323.58,MO,8.0,2323.58,0.0,0.0,100,CLEANING,months,True,False,per month,0.0,False,High
+Temporary toilet (per month),8.0,2380.8,MO,8.0,2380.8,0.0,0.0,100,PLUMBING,months,True,False,per month,0.0,False,High
+Temporary power usage (per month),8.0,2574.02,MO,8.0,2612.7,0.0,-38.679999999999836,100,TEMPORARY ITEMS,months,True,False,per month,-1.5,False,High
+R&R Temporary power - hookup,1.0,565.03,EA,1.0,454.58,0.0,110.44999999999999,92,TEMPORARY ITEMS,each,True,False,,19.55,True,Medium-High
+Job-site cargo/storage container - 16' long - per month,4.0,358.11,MO,,,,,0,CABINETRY,months,False,False,,,False,Medium-High
+Final cleaning - construction - Residential,2100.76,1058.78,SF,2185.11,1127.52,-84.34999999999991,-68.74000000000001,100,CLEANING,square_feet,False,False,,-6.49,True,High
+Building Permit - B23-1181 (Demo)*,1.0,306.39,EA,,,,,0,PERMITS & FEES,each,False,False,,,False,Medium-High
+Building Permit - B23-2090*,1.0,5320.47,EA,,,,,0,PERMITS & FEES,each,False,False,,,False,High
+Building Permit - B24-0511*,1.0,1991.51,EA,,,,,0,PERMITS & FEES,each,False,False,,,False,High
+Engineering fees*,1.0,3186.84,EA,,,,,0,PERMITS & FEES,each,False,False,,,False,High
+"Dumpster load - Approx. 40 yards, 7-8 tons of debris",2.0,3061.58,EA,2.0,3061.58,0.0,0.0,100,DUMPSTER & DEBRIS,each,False,False,,0.0,False,High
+Hazardous Waste/Mold Cleaning- Supervisory/Admin- per hour,12.0,1739.52,HR,12.0,1774.8,0.0,-35.27999999999997,98,CLEANING,hours,False,True,,-2.03,False,High
+Hazardous Waste/Mold Cleaning Technician - per hour,24.0,3135.74,HR,24.0,3182.4,0.0,-46.66000000000031,100,CLEANING,hours,False,True,,-1.49,False,High
+Add for personal protective equipment - Heavy duty,60.0,3081.3,EA,,,,,0,TOOLS,each,False,False,,,False,High
+Hydroxyl generator - odor counteractant - 3 optics,2.0,571.2,DA,2.0,571.2,0.0,0.0,100,CABINETRY,days,False,False,,0.0,False,Medium-High
+"R&R Sheathing - plywood - 1/2"" CDX",64.0,379.0,SF,64.0,366.59,0.0,12.410000000000025,100,FLOOR COVERING,square_feet,False,False,,3.27,False,Medium-High
+Roofing felt - 30 lb.,1.0,72.49,SQ,0.64,46.89,0.36,25.599999999999994,100,ROOFING,square,False,False,,35.32,True,Low
+Tile roofing - Detach & reset,1.5,2293.21,SQ,,,,,0,FLOOR COVERING,square,False,False,,,False,High
+Bird stop - Eave closure strip for tile roofing - clay,8.0,60.11,LF,,,,,0,FLOOR COVERING,linear_feet,False,False,,,False,Low
+Clean air conditioning condenser unit,1.0,129.0,EA,,,,,0,CLEANING,each,False,False,,,False,Medium-Low
+Digital satellite system - Detach & reset,1.0,72.25,EA,,,,,0,HVAC,each,False,False,,,False,Low
+Clean fascia,310.26,420.71,LF,,,,,0,ROOFING,linear_feet,False,False,,,False,Medium-High
+Clean soffit - wood,357.71,262.19,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-High
+Clean with pressure/chemical spray,2813.8,1724.78,SF,,,,,0,CLEANING,square_feet,False,False,,,False,High
+"R&R Siding - hardboard - lap pattern - 8""",928.8,7281.15,SF,,,,,0,SIDING,square_feet,False,False,,,False,High
+R&R House wrap (air/moisture barrier),928.8,584.72,SF,622.5,394.08,306.29999999999995,190.64000000000004,100,HVAC,square_feet,False,False,,32.6,True,Medium-High
+Prime & paint gutter / downspout,79.25,228.58,LF,35.0,101.99,44.25,126.59000000000002,100,PAINTING,linear_feet,False,False,,55.38,True,Medium-High
+"Prime & paint exterior fascia - wood, 6""- 8"" wide",310.26,1168.87,LF,260.0,990.1,50.25999999999999,178.76999999999987,100,FLOOR COVERING,linear_feet,False,False,,15.29,True,High
+Prime & paint exterior soffit - exposed rafters,321.18,1780.49,SF,465.39,2611.16,-144.20999999999998,-830.6699999999998,100,PAINTING,square_feet,False,False,,-46.65,True,High
+Prime & paint exterior soffit - wood,36.53,145.31,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Seal & paint wood siding,928.8,3007.01,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,High
+Paint wood siding - 1 coat,1885.0,4002.04,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,High
+"R&R 2"" x 4"" lumber - redwood (.667 BF per LF)",439.17,3750.82,LF,129.0,1118.39,310.17,2632.4300000000003,100,FLOOR COVERING,linear_feet,False,False,,70.18,True,High
+Seal & paint door or window opening (per side),23.0,1288.15,EA,17.0,966.15,6.0,322.0000000000001,100,OFFICE SUPPLIES,each,False,False,per side,25.0,True,High
+Seal & paint door or window opening - Large (per side),1.0,69.91,EA,17.0,966.15,-16.0,-896.24,92,OFFICE SUPPLIES,each,False,False,per side,-1281.99,True,Low
+Clean overhead door & hardware - Large,1.0,118.35,EA,,,,,0,CLEANING,each,False,False,,,False,Medium-Low
+Paint overhead door - Large - 2 coats (per side),1.0,310.83,EA,1.0,218.28,0.0,92.54999999999998,91,PAINTING,each,False,False,per side,29.78,True,Medium-High
+Paint/finish - fence post - wood,7.0,230.69,EA,,,,,0,FLOOR COVERING,each,False,False,,,False,Medium-High
+Wire - average residence - copper wiring,1822.0,18609.82,SF,,,,,0,ELECTRICAL,square_feet,False,False,,,False,High
+Ductwork system - hot or cold air - 1600 to 2199 SF home,1.0,9663.67,EA,1.0,10776.51,0.0,-1112.8400000000001,97,HVAC,each,False,False,,-11.52,True,High
+"Batt insulation - 4"" - R15 - paper / foil faced",1532.27,2670.39,SF,2970.0,4284.47,-1437.73,-1614.0800000000004,98,OFFICE SUPPLIES,square_feet,False,False,,-60.44,True,High
+"Batt insulation - 10"" - R30 - unfaced batt",347.67,814.54,SF,917.0,1446.05,-569.3299999999999,-631.51,92,HVAC,square_feet,False,False,,-77.53,True,High
+Final cleaning - construction - Residential,1310.87,660.69,SF,2185.11,1127.52,-874.2400000000002,-466.8299999999999,100,CLEANING,square_feet,False,False,,-70.66,True,High
+Demolish/remove - bedroom/room (over 200 sf),323.27,2630.13,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),347.67,567.39,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-High
+Seal floor or ceiling joist system (shellac),347.67,857.66,SF,841.0,2102.06,-493.33,-1244.4,100,FLOOR COVERING,square_feet,False,False,,-145.09,True,High
+Additional cost for high ceiling*,347.67,54.24,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),730.79,1140.03,SF,3500.0,5586.0,-2769.21,-4445.97,100,PAINTING,square_feet,False,False,,-389.99,True,High
+Seal stud wall for odor control (shellac),730.79,1342.51,SF,3500.0,6497.62,-2769.21,-5155.11,100,PAINTING,square_feet,False,False,,-383.99,True,High
+Additional cost for high wall*,336.91,52.56,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+Clean floor or roof joist system,323.27,601.92,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-High
+Seal floor or ceiling joist system (shellac),323.27,797.48,SF,841.0,2102.06,-517.73,-1304.58,100,FLOOR COVERING,square_feet,False,False,,-163.59,True,High
+Deodorize building - Ozone & hydroxyl treatment,5355.43,385.59,CF,30.33,1.82,5325.1,383.77,87,CLEANING,cubic_feet,False,False,,99.53,True,Medium-High
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",347.67,1959.0,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Additional cost for high ceiling*,347.67,504.82,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,347.67,588.06,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Additional cost for high ceiling*,347.67,54.24,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",730.79,3972.46,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Additional cost for high wall*,336.91,489.2,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Add for bullnose (rounded) corners - per LF,196.97,1357.6,LF,,,,,0,BULLNOSE,linear_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,730.79,1236.06,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Additional cost for high wall*,336.91,52.56,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+Carpet pad,303.27,269.83,SF,1567.0,1409.78,-1263.73,-1139.95,100,FLOOR COVERING,square_feet,False,False,,-422.47,True,Medium-High
+Carpet,348.76,2049.59,SF,1802.05,10727.48,-1453.29,-8677.89,100,FLOOR COVERING,square_feet,False,False,,-423.4,True,High
+Tile floor covering,20.0,465.84,SF,261.0,6144.38,-241.0,-5678.54,100,FLOOR COVERING,square_feet,False,False,,-1218.99,True,Medium-High
+Tile/stone sealer,20.0,41.44,SF,41.58,86.92,-21.58,-45.480000000000004,100,FLOOR COVERING,square_feet,False,False,,-109.75,True,Low
+R&R Exterior door - metal - insulated - flush or panel style,1.0,719.59,EA,,,,,0,SIDING,each,False,False,,,False,High
+Prime & paint door slab only - exterior (per side),2.0,158.91,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,1.0,56.01,EA,17.0,966.15,-16.0,-910.14,87,OFFICE SUPPLIES,each,False,False,per side,-1624.96,True,Low
+Door lockset & deadbolt - exterior,1.0,122.51,EA,,,,,0,SIDING,each,False,False,,,False,Medium-Low
+"Aluminum window, picture/fixed 3-11 sf (2 pane)",1.0,254.66,EA,1.0,303.13,0.0,-48.47,96,SIDING,each,False,False,,-19.03,True,Medium-High
+"Aluminum window, picture/fixed 24-32 sf (2 pane)",1.0,547.69,EA,2.0,968.02,-1.0,-420.3299999999999,92,SIDING,each,False,False,,-76.75,True,Medium-High
+"Aluminum window, horiz. slider 33-40 sf (2 pane)",1.0,834.09,EA,1.0,916.54,0.0,-82.44999999999993,96,SIDING,each,False,False,,-9.89,True,High
+"Aluminum window, picture/fixed 12-23 sf (2 pane)",5.0,2164.41,EA,2.0,968.02,3.0,1196.3899999999999,96,SIDING,each,False,False,,55.28,True,High
+"Aluminum window, horiz. slider 12-23 sf (2 pane)",3.0,1516.66,EA,1.0,513.07,2.0,1003.59,100,SIDING,each,False,False,,66.17,True,High
+Add on for grid (double or triple glazed windows),188.5,1019.91,SF,328.0,1801.36,-139.5,-781.4499999999999,100,WINDOWS,square_feet,False,False,,-76.62,True,High
+Window stool & apron,24.0,331.56,LF,103.5,1455.35,-79.5,-1123.79,100,TOOLS,linear_feet,False,False,,-338.94,True,Medium-High
+Seal & paint window stool and apron,24.0,170.97,LF,103.5,745.68,-79.5,-574.7099999999999,100,PAINTING,linear_feet,False,False,,-336.15,True,Medium-Low
+"Baseboard - 2 1/4""",71.96,379.94,LF,587.0,3758.84,-515.04,-3378.9,94,FINISH CARPENTRY,linear_feet,False,False,,-889.32,True,Medium-High
+Seal (1 coat) & paint (1 coat) baseboard*,71.96,192.69,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Medium-Low
+Chandelier,2.0,812.68,EA,1.0,412.08,1.0,400.59999999999997,100,LIGHTING & ELECTRICAL,each,False,False,,49.29,True,High
+Ceiling fan without light,1.0,405.14,EA,1.0,410.78,0.0,-5.639999999999986,100,PAINTING,each,False,False,,-1.39,False,Medium-High
+"Add on - Ceiling fan down rod - 37""-72""",1.0,117.09,EA,,,,,0,PAINTING,each,False,False,,,False,Medium-Low
+Window blind - single cell - 7.1 to 14 SF,6.0,1028.55,EA,,,,,0,WINDOWS,each,False,False,,,False,High
+"Window blind - PVC - 2"" - 14.1 to 20 SF",5.0,865.16,EA,5.0,877.94,0.0,-12.780000000000086,100,WINDOWS,each,False,False,,-1.48,False,High
+Demolish/remove - kitchen/laundry,143.52,2819.3,SF,,,,,0,CABINETRY,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),143.52,234.23,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-High
+Seal floor or ceiling joist system (shellac),143.52,354.05,SF,841.0,2102.06,-697.48,-1748.01,100,FLOOR COVERING,square_feet,False,False,,-493.72,True,Medium-High
+HEPA Vacuuming exposed framing - Walls - (PER SF),291.29,454.42,SF,3500.0,5586.0,-3208.71,-5131.58,100,PAINTING,square_feet,False,False,,-1129.26,True,Medium-High
+Seal stud wall for odor control (shellac),291.29,535.11,SF,3500.0,6497.62,-3208.71,-5962.51,100,PAINTING,square_feet,False,False,,-1114.26,True,Medium-High
+Clean floor or roof joist system,143.52,267.24,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-High
+Seal floor or ceiling joist system (shellac),143.52,354.05,SF,841.0,2102.06,-697.48,-1748.01,100,FLOOR COVERING,square_feet,False,False,,-493.72,True,Medium-High
+Deodorize building - Ozone & hydroxyl treatment,1291.64,93.0,CF,30.33,1.82,1261.3100000000002,91.18,87,CLEANING,cubic_feet,False,False,,98.04,True,Medium-Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",143.52,808.69,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,143.52,242.75,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",291.29,1583.41,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Add for bullnose (rounded) corners - per LF,39.0,268.8,LF,,,,,0,BULLNOSE,linear_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the walls*,291.29,492.69,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Tile floor covering,112.75,2626.18,SF,261.0,6144.38,-148.25,-3518.2000000000003,100,FLOOR COVERING,square_feet,False,False,,-133.97,True,High
+Tile/stone sealer,112.75,233.65,SF,41.58,86.92,71.17,146.73000000000002,100,FLOOR COVERING,square_feet,False,False,,62.8,True,Medium-High
+"Aluminum window, horiz. slider 12-23 sf (2 pane)",1.0,505.55,EA,1.0,513.07,0.0,-7.520000000000039,100,SIDING,each,False,False,,-1.49,False,Medium-High
+"Aluminum window, horiz. slider 24-32 sf (2 pane)",1.0,623.14,EA,2.0,1404.83,-1.0,-781.6899999999999,96,SIDING,each,False,False,,-125.44,True,High
+Add on for grid (double or triple glazed windows),47.0,254.3,SF,328.0,1801.36,-281.0,-1547.06,100,WINDOWS,square_feet,False,False,,-608.36,True,Medium-High
+Window stool & apron,11.0,151.97,LF,103.5,1455.35,-92.5,-1303.3799999999999,100,TOOLS,linear_feet,False,False,,-857.66,True,Medium-Low
+Seal & paint window stool and apron,11.0,78.36,LF,103.5,745.68,-92.5,-667.3199999999999,100,PAINTING,linear_feet,False,False,,-851.61,True,Low
+"Baseboard - 2 1/4""",16.54,87.32,LF,587.0,3758.84,-570.46,-3671.52,94,FINISH CARPENTRY,linear_feet,False,False,,-4204.67,True,Medium-Low
+Seal (1 coat) & paint (1 coat) baseboard*,16.54,44.29,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Cabinetry - full height unit - High grade,3.0,1798.09,LF,3.0,1824.95,0.0,-26.860000000000127,100,CABINETRY,linear_feet,False,False,,-1.49,False,High
+Cabinetry - upper (wall) units - High grade,5.5,1665.89,LF,16.5,5072.05,-11.0,-3406.16,100,PAINTING,linear_feet,False,False,,-204.46,True,High
+Cabinetry - upper (wall) units - High grade,10.75,3256.04,LF,16.5,5072.05,-5.75,-1816.0100000000002,100,PAINTING,linear_feet,False,False,,-55.77,True,High
+Add for prefinished crown molding per LF,18.25,294.0,LF,15.0,245.35,3.25,48.650000000000006,100,PAINTING,linear_feet,False,False,,16.55,True,Medium-High
+Cabinetry - lower (base) units - High grade,13.0,7248.31,LF,15.5,8771.41,-2.5,-1523.0999999999995,100,CABINETRY,linear_feet,False,False,,-21.01,True,High
+Wood appliance panel - High grade,30.0,1901.91,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,High
+Countertop subdeck - plywood,30.0,253.19,SF,32.0,199.49,-2.0,53.69999999999999,100,FLOOR COVERING,square_feet,False,False,,21.21,True,Medium-High
+Countertop - Tile,43.0,2443.06,SF,9.58,549.96,33.42,1893.1,100,FLOOR COVERING,square_feet,False,False,,77.49,True,High
+Mortar bed for tile,33.0,531.6,SF,41.58,678.33,-8.579999999999998,-146.73000000000002,100,FLOOR COVERING,square_feet,False,False,,-27.6,True,Medium-High
+Add-on for tile backsplash installation,10.0,396.36,SF,20.0,800.4,-10.0,-404.03999999999996,100,FLOOR COVERING,square_feet,False,False,,-101.94,True,Medium-High
+Seal grout on tile wall,10.0,36.88,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Tile/stone sealer,33.0,68.38,SF,41.58,86.92,-8.579999999999998,-18.540000000000006,100,FLOOR COVERING,square_feet,False,False,,-27.11,True,Low
+Sink - double basin,1.0,590.5,EA,,,,,0,OFFICE SUPPLIES,each,False,False,,,False,Medium-High
+Sink strainer and drain assembly,2.0,170.53,EA,1.0,86.3,1.0,84.23,100,OFFICE SUPPLIES,each,False,False,,49.39,True,Medium-Low
+Sink faucet - Kitchen - High grade,1.0,549.67,EA,1.0,722.18,0.0,-172.51,87,OFFICE SUPPLIES,each,False,False,,-31.38,True,Medium-High
+Angle stop valve,2.0,126.54,EA,2.0,128.02,0.0,-1.480000000000004,100,PLUMBING,each,False,False,,-1.17,False,Medium-Low
+Water filtration system - under sink,1.0,388.29,EA,,,,,0,OFFICE SUPPLIES,each,False,False,,,False,Medium-High
+Refrigerator/icemaker water supply box with valve,1.0,269.46,EA,1.0,272.86,0.0,-3.400000000000034,100,PLUMBING,each,False,False,,-1.26,False,Medium-High
+"Flexible gas supply line connector - 1/2"" - up to 24""",1.0,50.94,EA,1.0,51.31,0.0,-0.37000000000000455,100,GAS SUPPLY,each,False,False,,-0.73,False,Low
+"Ball valve - brass - up to 1/2""",1.0,80.33,EA,1.0,81.28,0.0,-0.9500000000000028,100,PLUMBING,each,False,False,,-1.18,False,Low
+Remove Refrigerator - side by side - 25 to 30 cf,1.0,73.18,EA,,,,,0,UNCATEGORIZED,each,False,False,,,False,Low
+Install Refrigerator - side by side - 25 to 30 cf,1.0,67.76,EA,,,,,0,UNCATEGORIZED,each,False,False,,,False,Low
+"Appliance water line - 1/4""",1.0,137.2,EA,1.0,138.9,0.0,-1.700000000000017,100,PLUMBING,each,False,False,,-1.24,False,Medium-Low
+R&R Microwave oven - over range w/built-in hood,1.0,674.3,EA,1.0,624.66,0.0,49.639999999999986,96,APPLIANCES,each,False,False,,7.36,True,High
+"Ductwork - hot or cold air - 4"" round",12.0,287.01,LF,,,,,0,HVAC,linear_feet,False,False,,,False,Medium-High
+R&R Range - freestanding - gas,1.0,1635.92,EA,,,,,0,APPLIANCES,each,False,False,,,False,High
+Garbage disposer,1.0,403.91,EA,1.0,409.08,0.0,-5.169999999999959,100,DUMPSTER & DEBRIS,each,False,False,,-1.28,False,Medium-High
+R&R Dishwasher,1.0,978.36,EA,,,,,0,CLEANING,each,False,False,,,False,High
+Dishwasher supply line - material only,1.0,25.45,EA,1.0,25.83,0.0,-0.379999999999999,100,CLEANING,each,False,False,,-1.49,False,Low
+Flush mount wood-framed acrylic lens light fixture*,24.0,1181.24,EA,,,,,0,FLOOR COVERING,each,False,False,,,False,High
+Chandelier,1.0,406.35,EA,1.0,412.08,0.0,-5.729999999999961,100,LIGHTING & ELECTRICAL,each,False,False,,-1.41,False,Medium-High
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+"Window blind - PVC - 2"" - 14.1 to 20 SF",1.0,173.04,EA,5.0,877.94,-4.0,-704.9000000000001,100,WINDOWS,each,False,False,,-407.36,True,Medium-Low
+"Window blind - PVC - 2"" - 20.1 to 32 SF",1.0,228.15,EA,1.0,231.54,0.0,-3.3899999999999864,100,WINDOWS,each,False,False,,-1.49,False,Medium-High
+Demolish/remove - bedroom/room (over 200 sf),244.42,1988.61,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),244.42,398.89,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-High
+Seal floor or ceiling joist system (shellac),244.42,602.96,SF,841.0,2102.06,-596.58,-1499.1,100,FLOOR COVERING,square_feet,False,False,,-248.62,True,Medium-High
+Soda blasting exposed framing - Walls (PER SF),180.0,854.46,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+HEPA Vacuuming exposed framing - Walls - (PER SF),344.91,538.06,SF,3500.0,5586.0,-3155.09,-5047.9400000000005,100,PAINTING,square_feet,False,False,,-938.17,True,Medium-High
+Seal stud wall for odor control (shellac),344.91,633.63,SF,3500.0,6497.62,-3155.09,-5863.99,100,PAINTING,square_feet,False,False,,-925.46,True,High
+Clean floor or roof joist system,244.42,455.11,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-High
+Seal floor or ceiling joist system (shellac),244.42,602.96,SF,841.0,2102.06,-596.58,-1499.1,100,FLOOR COVERING,square_feet,False,False,,-248.62,True,Medium-High
+Deodorize building - Ozone & hydroxyl treatment,2199.74,158.38,CF,30.33,1.82,2169.41,156.56,87,CLEANING,cubic_feet,False,False,,98.85,True,Medium-Low
+"Floor trusses - up to 16"" deep",24.0,415.9,LF,24.0,422.0,0.0,-6.100000000000023,100,FLOOR COVERING,linear_feet,False,False,,-1.47,False,Medium-High
+Carpenter - General Framer - per hour,4.0,551.04,HR,,,,,0,OFFICE SUPPLIES,hours,False,True,,,False,Medium-High
+"R&R Sheathing - plywood - 1/2"" CDX",32.0,159.92,SF,64.0,366.59,-32.0,-206.67,100,FLOOR COVERING,square_feet,False,False,,-129.23,True,Medium-Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",244.42,1377.22,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,244.42,413.4,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",344.91,1874.88,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Add for bullnose (rounded) corners - per LF,99.43,685.32,LF,,,,,0,BULLNOSE,linear_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,344.91,583.37,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Carpet pad,244.42,217.46,SF,1567.0,1409.78,-1322.58,-1192.32,100,FLOOR COVERING,square_feet,False,False,,-548.29,True,Medium-Low
+Carpet,281.08,1651.84,SF,1802.05,10727.48,-1520.97,-9075.64,100,FLOOR COVERING,square_feet,False,False,,-549.43,True,High
+R&R 6-0 8-0 alum. sliding patio door - anodized - High grade,1.0,2373.94,EA,1.0,2112.78,0.0,261.15999999999985,88,CONCRETE & ASPHALT,each,False,False,,11.0,True,High
+"Aluminum window, single hung 9-12 sf (2 pane)",1.0,378.85,EA,,,,,0,SIDING,each,False,False,,,False,Medium-High
+"Aluminum window, horiz. slider 24-32 sf (2 pane)",1.0,623.14,EA,2.0,1404.83,-1.0,-781.6899999999999,96,SIDING,each,False,False,,-125.44,True,High
+Add on for grid (double or triple glazed windows),92.0,497.76,SF,328.0,1801.36,-236.0,-1303.6,100,WINDOWS,square_feet,False,False,,-261.89,True,Medium-High
+Window stool & apron,8.0,110.52,LF,103.5,1455.35,-95.5,-1344.83,100,TOOLS,linear_feet,False,False,,-1216.82,True,Medium-Low
+Seal & paint window stool and apron,8.0,56.99,LF,103.5,745.68,-95.5,-688.6899999999999,100,PAINTING,linear_feet,False,False,,-1208.44,True,Low
+"Baseboard - 2 1/4""",38.72,204.44,LF,587.0,3758.84,-548.28,-3554.4,94,FINISH CARPENTRY,linear_feet,False,False,,-1738.6,True,Medium-Low
+Seal (1 coat) & paint (1 coat) baseboard*,38.72,103.69,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Medium-Low
+"R&R Fireplace, zero clnce, gas burning, w/ venting",1.0,4621.75,EA,,,,,0,ROOFING,each,False,False,,,False,High
+R&R Fireplace mantel - wood beam or shelf only (per LF),5.0,756.71,LF,,,,,0,FLOOR COVERING,linear_feet,False,False,per LF,,False,High
+Stain & finish wood fireplace mantel,5.0,71.21,LF,,,,,0,FLOOR COVERING,linear_feet,False,False,,,False,Low
+Fireplace hearth - tile,20.0,786.87,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,High
+Ceiling fan & light,1.0,556.01,EA,1.0,563.76,0.0,-7.75,100,PAINTING,each,False,False,,-1.39,False,Medium-High
+Window drapery - hardware - single rod - Large,1.0,130.04,EA,,,,,0,WINDOWS,each,False,False,,,False,Medium-Low
+"Window blind - PVC - 2"" - 7.1 to 14 SF",1.0,136.28,EA,6.0,829.68,-5.0,-693.4,100,WINDOWS,each,False,False,,-508.81,True,Medium-Low
+"Window blind - PVC - 2"" - 20.1 to 32 SF",1.0,228.15,EA,1.0,231.54,0.0,-3.3899999999999864,100,WINDOWS,each,False,False,,-1.49,False,Medium-High
+Demolish/remove - bedroom/room (up to 200 sf),5.04,47.41,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,Low
+HEPA Vacuuming - Detailed - (PER SF),5.04,8.23,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),5.04,12.44,SF,841.0,2102.06,-835.96,-2089.62,100,FLOOR COVERING,square_feet,False,False,,-16797.59,True,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),46.29,72.22,SF,3500.0,5586.0,-3453.71,-5513.78,100,PAINTING,square_feet,False,False,,-7634.7,True,Low
+Seal stud wall for odor control (shellac),46.29,85.04,SF,3500.0,6497.62,-3453.71,-6412.58,100,PAINTING,square_feet,False,False,,-7540.66,True,Low
+Clean floor or roof joist system,5.04,9.38,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),5.04,12.44,SF,841.0,2102.06,-835.96,-2089.62,100,FLOOR COVERING,square_feet,False,False,,-16797.59,True,Low
+Deodorize building - Ozone & hydroxyl treatment,35.29,2.54,CF,30.33,1.82,4.960000000000001,0.72,87,CLEANING,cubic_feet,False,False,,28.35,True,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",37.0,201.12,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Add for bullnose (rounded) corners - per LF,11.5,79.26,LF,,,,,0,BULLNOSE,linear_feet,False,False,,,False,Low
+Seal/prime (1 coat) then paint (1 coat) the surface area*,37.0,62.58,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"Bead board - 1/4"" to 3/8"" hardwood",37.0,218.53,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Stain & finish paneling,37.0,105.38,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+"Shelving - 24"" - in place - stain grade",5.5,199.43,LF,,,,,0,HVAC,linear_feet,False,False,,,False,Medium-Low
+"Stain & finish wood shelving, 12""- 24"" width",5.5,55.9,LF,,,,,0,FLOOR COVERING,linear_feet,False,False,,,False,Low
+"Trim board - 1"" x 4"" - installed (hardwood - oak or =)",24.0,221.16,LF,,,,,0,FLOOR COVERING,linear_feet,False,False,,,False,Medium-Low
+"Trim board - 1"" x 2"" - installed (hardwood - oak or =)",12.0,79.01,LF,,,,,0,FLOOR COVERING,linear_feet,False,False,,,False,Low
+Demolish/remove - bedroom/room (up to 200 sf),11.19,105.27,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,Medium-Low
+HEPA Vacuuming - Detailed - (PER SF),11.19,18.26,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),11.19,27.6,SF,841.0,2102.06,-829.81,-2074.46,100,FLOOR COVERING,square_feet,False,False,,-7516.16,True,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),76.48,119.3,SF,3500.0,5586.0,-3423.52,-5466.7,100,PAINTING,square_feet,False,False,,-4582.31,True,Medium-Low
+Seal stud wall for odor control (shellac),76.48,140.49,SF,3500.0,6497.62,-3423.52,-6357.13,100,PAINTING,square_feet,False,False,,-4524.97,True,Medium-Low
+Clean floor or roof joist system,11.19,20.82,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),11.19,27.6,SF,841.0,2102.06,-829.81,-2074.46,100,FLOOR COVERING,square_feet,False,False,,-7516.16,True,Low
+Deodorize building - Ozone & hydroxyl treatment,100.72,7.24,CF,30.33,1.82,70.39,5.42,87,CLEANING,cubic_feet,False,False,,74.86,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",11.19,63.05,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,11.19,18.93,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",76.48,415.73,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the walls*,76.48,129.36,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Carpet pad,11.19,9.95,SF,1567.0,1409.78,-1555.81,-1399.83,100,FLOOR COVERING,square_feet,False,False,,-14068.64,True,Low
+Carpet,12.87,75.64,SF,1802.05,10727.48,-1789.18,-10651.84,100,FLOOR COVERING,square_feet,False,False,,-14082.28,True,Low
+"Door opening (jamb & casing) - 32"" to 36"" wide - hardwood",1.0,331.95,EA,,,,,0,FLOOR COVERING,each,False,False,,,False,Medium-High
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+"Baseboard - 2 1/4""",6.71,35.43,LF,587.0,3758.84,-580.29,-3723.4100000000003,94,FINISH CARPENTRY,linear_feet,False,False,,-10509.2,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,6.71,17.97,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Thermostat,1.0,164.42,EA,,,,,0,HVAC,each,False,False,,,False,Medium-Low
+Demolish/remove - bathroom (up to 50 sf),20.55,546.71,SF,,,,,0,CABINETRY,square_feet,False,False,,,False,Medium-High
+HEPA Vacuuming - Detailed - (PER SF),20.55,33.55,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),20.55,50.69,SF,841.0,2102.06,-820.45,-2051.37,100,FLOOR COVERING,square_feet,False,False,,-4046.89,True,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),151.17,235.82,SF,3500.0,5586.0,-3348.83,-5350.18,100,PAINTING,square_feet,False,False,,-2268.76,True,Medium-High
+Seal stud wall for odor control (shellac),151.17,277.72,SF,3500.0,6497.62,-3348.83,-6219.9,100,PAINTING,square_feet,False,False,,-2239.63,True,Medium-High
+Clean floor or roof joist system,20.55,38.27,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),20.55,50.69,SF,841.0,2102.06,-820.45,-2051.37,100,FLOOR COVERING,square_feet,False,False,,-4046.89,True,Low
+Deodorize building - Ozone & hydroxyl treatment,176.58,12.71,CF,30.33,1.82,146.25,10.89,87,CLEANING,cubic_feet,False,False,,85.68,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",20.55,115.78,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,20.55,34.76,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",151.17,821.74,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Add for bullnose (rounded) corners - per LF,3.0,20.68,LF,,,,,0,BULLNOSE,linear_feet,False,False,,,False,Low
+Seal/prime (1 coat) then paint (1 coat) the walls*,151.17,255.69,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Tile floor covering,20.55,478.66,SF,261.0,6144.38,-240.45,-5665.72,100,FLOOR COVERING,square_feet,False,False,,-1183.66,True,Medium-High
+Tile base,16.83,652.72,LF,45.95,1800.59,-29.120000000000005,-1147.87,100,FLOOR COVERING,linear_feet,False,False,,-175.86,True,High
+Tile/stone sealer,28.96,60.0,SF,41.58,86.92,-12.619999999999997,-26.92,100,FLOOR COVERING,square_feet,False,False,,-44.87,True,Low
+Pocket door unit - Colonist,1.0,491.84,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Pocket door hardware,1.0,145.46,EA,,,,,0,DOORS,each,False,False,,,False,Medium-Low
+"Casing - 3 1/4""",34.0,190.38,LF,,,,,0,FINISH CARPENTRY,linear_feet,False,False,,,False,Medium-Low
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Medicine cabinet,1.0,270.25,EA,1.0,274.28,0.0,-4.029999999999973,100,CABINETRY,each,False,False,,-1.49,False,Medium-High
+Pedestal sink,1.0,831.28,EA,1.0,841.95,0.0,-10.670000000000073,100,OFFICE SUPPLIES,each,False,False,,-1.28,False,High
+Sink faucet - Bathroom,1.0,339.44,EA,1.0,343.91,0.0,-4.470000000000027,100,OFFICE SUPPLIES,each,False,False,,-1.32,False,Medium-High
+Toilet,1.0,807.65,EA,1.0,818.11,0.0,-10.460000000000036,100,PLUMBING,each,False,False,,-1.3,False,High
+Toilet seat,1.0,88.48,EA,,,,,0,PLUMBING,each,False,False,,,False,Medium-Low
+Angle stop valve,3.0,189.8,EA,2.0,128.02,1.0,61.78,100,PLUMBING,each,False,False,,32.55,True,Medium-Low
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Bathroom ventilation fan,1.0,161.35,EA,1.0,163.64,0.0,-2.289999999999992,100,ROOFING,each,False,False,,-1.42,False,Medium-Low
+Towel bar,1.0,43.51,EA,1.0,44.16,0.0,-0.6499999999999986,100,BATHROOM ACCESSORIES,each,False,False,,-1.49,False,Low
+Toilet paper holder,1.0,39.98,EA,1.0,40.57,0.0,-0.5900000000000034,100,OFFICE SUPPLIES,each,False,False,,-1.48,False,Low
+Demolish/remove - kitchen/laundry,35.83,703.84,SF,,,,,0,CABINETRY,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),35.83,58.47,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),35.83,88.4,SF,841.0,2102.06,-805.17,-2013.6599999999999,100,FLOOR COVERING,square_feet,False,False,,-2277.9,True,Medium-Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),182.66,284.96,SF,3500.0,5586.0,-3317.34,-5301.04,100,PAINTING,square_feet,False,False,,-1860.28,True,Medium-High
+Seal stud wall for odor control (shellac),182.66,335.56,SF,3500.0,6497.62,-3317.34,-6162.0599999999995,100,PAINTING,square_feet,False,False,,-1836.35,True,Medium-High
+Clean floor or roof joist system,35.83,66.71,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),35.83,88.4,SF,841.0,2102.06,-805.17,-2013.6599999999999,100,FLOOR COVERING,square_feet,False,False,,-2277.9,True,Medium-Low
+Deodorize building - Ozone & hydroxyl treatment,322.43,23.23,CF,30.33,1.82,292.1,21.41,87,CLEANING,cubic_feet,False,False,,92.17,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",35.83,201.88,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,35.83,60.6,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",182.66,992.92,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,182.66,308.95,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Tile floor covering,33.7,784.94,SF,261.0,6144.38,-227.3,-5359.4400000000005,100,FLOOR COVERING,square_feet,False,False,,-682.78,True,High
+Tile base,16.08,623.63,LF,45.95,1800.59,-29.870000000000005,-1176.96,100,FLOOR COVERING,linear_feet,False,False,,-188.73,True,High
+Tile/stone sealer,41.74,86.5,SF,41.58,86.92,0.1600000000000037,-0.4200000000000017,100,FLOOR COVERING,square_feet,False,False,,-0.49,False,Medium-Low
+R&R Exterior door - metal - insulated - flush or panel style,1.0,719.59,EA,,,,,0,SIDING,each,False,False,,,False,High
+Prime & paint door slab only - exterior (per side),2.0,158.91,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,1.0,56.01,EA,17.0,966.15,-16.0,-910.14,87,OFFICE SUPPLIES,each,False,False,per side,-1624.96,True,Low
+Door lockset & deadbolt - exterior,1.0,122.51,EA,,,,,0,SIDING,each,False,False,,,False,Medium-Low
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+Custom cabinets - full height units,1.5,906.59,LF,,,,,0,SPECIALTY ITEMS,linear_feet,False,False,,,False,High
+"Custom cabinets - wall units - 36"" tall",5.0,1568.4,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,High
+Add for prefinished crown molding per LF,6.5,104.71,LF,15.0,245.35,-8.5,-140.64,100,PAINTING,linear_feet,False,False,,-134.31,True,Medium-Low
+Washing machine outlet box with valves,1.0,446.15,EA,1.0,451.2,0.0,-5.050000000000011,100,PLUMBING,each,False,False,,-1.13,False,Medium-High
+Remove Washer/Washing Machine - Front-loading,1.0,52.28,EA,,,,,0,CLEANING,each,False,False,,,False,Low
+Install Washer/Washing Machine - Front-loading,1.0,206.4,EA,,,,,0,CLEANING,each,False,False,,,False,Medium-Low
+Remove Dryer - Electric,1.0,39.27,EA,,,,,0,ELECTRICAL,each,False,False,,,False,Low
+Install Dryer - Electric,1.0,149.98,EA,,,,,0,ELECTRICAL,each,False,False,,,False,Medium-Low
+"Ductwork - hot or cold air - 4"" round",7.0,167.43,LF,,,,,0,HVAC,linear_feet,False,False,,,False,Medium-Low
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Bathroom ventilation fan,1.0,161.35,EA,1.0,163.64,0.0,-2.289999999999992,100,ROOFING,each,False,False,,-1.42,False,Medium-Low
+Demolish/remove - bedroom/room (over 200 sf),437.9,3562.76,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),437.9,714.64,SF,,,,,0,CLEANING,square_feet,False,False,,,False,High
+Seal floor or ceiling joist system (shellac),437.9,1080.27,SF,841.0,2102.06,-403.1,-1021.79,100,FLOOR COVERING,square_feet,False,False,,-94.59,True,High
+HEPA Vacuuming exposed framing - Walls - (PER SF),698.83,1090.18,SF,3500.0,5586.0,-2801.17,-4495.82,100,PAINTING,square_feet,False,False,,-412.39,True,High
+Seal stud wall for odor control (shellac),698.83,1283.8,SF,3500.0,6497.62,-2801.17,-5213.82,100,PAINTING,square_feet,False,False,,-406.12,True,High
+Clean concrete the floor,437.9,252.66,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-High
+Deodorize building - Ozone & hydroxyl treatment,3941.07,283.76,CF,30.33,1.82,3910.7400000000002,281.94,87,CLEANING,cubic_feet,False,False,,99.36,True,Medium-High
+"5/8"" drywall - hung, taped, floated, ready for paint",437.9,2118.18,SF,8966.0,7423.84,-8528.1,-5305.66,90,PAINTING,square_feet,False,False,,-250.48,True,High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,437.9,740.67,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+"5/8"" drywall - hung, taped, floated, ready for paint",698.83,3380.34,SF,8966.0,7423.84,-8267.17,-4043.5,90,PAINTING,square_feet,False,False,,-119.62,True,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,698.83,1182.0,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Exterior door slab - Detach & reset,1.0,49.28,EA,,,,,0,SIDING,each,False,False,,,False,Low
+Detach & Reset Door lockset & deadbolt - exterior,1.0,57.43,EA,,,,,0,SIDING,each,False,False,,,False,Low
+Prime & paint door slab only - exterior (per side),2.0,158.91,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+"Casing - 2 1/4""",17.0,65.19,LF,,,,,0,FINISH CARPENTRY,linear_feet,False,False,,,False,Low
+Overhead (garage) door opener - Detach & reset,1.0,416.02,EA,,,,,0,OFFICE SUPPLIES,each,False,False,,,False,Medium-High
+Overhead door - Detach & reset - Large,1.0,906.91,EA,,,,,0,DOORS,each,False,False,,,False,High
+Seal & paint door opening (per side)*,1.0,56.01,EA,17.0,966.15,-16.0,-910.14,87,OFFICE SUPPLIES,each,False,False,per side,-1624.96,True,Low
+Porcelain light fixture,2.0,108.57,EA,,,,,0,TILE,each,False,False,,,False,Medium-Low
+Furnace - forced air - Detach & reset,1.0,1413.03,EA,,,,,0,HVAC,each,False,False,,,False,High
+Water heater - Detach & reset,1.0,1079.0,EA,,,,,0,PLUMBING,each,False,False,,,False,High
+Water softener - Detach & reset,1.0,1079.0,EA,,,,,0,PLUMBING,each,False,False,,,False,High
+Remove Water heater seismic strap kit - up to 55 gallon,1.0,25.8,EA,,,,,0,PLUMBING,each,False,False,,,False,Low
+Remove Water heater overflow drain pan,1.0,12.2,EA,,,,,0,PLUMBING,each,False,False,,,False,Low
+Install Water heater seismic strap kit - up to 55 gallon,1.0,77.41,EA,,,,,0,PLUMBING,each,False,False,,,False,Low
+Install Water heater overflow drain pan,1.0,53.95,EA,,,,,0,PLUMBING,each,False,False,,,False,Low
+"Furnace or A/C - check, hvy cln, replace filters & service",2.0,1072.14,EA,,,,,0,HVAC,each,False,False,,,False,High
+Clean water heater,1.0,46.1,EA,,,,,0,PLUMBING,each,False,False,,,False,Low
+Clean water softener,1.0,55.21,EA,,,,,0,PLUMBING,each,False,False,,,False,Low
+Demolish/remove - bedroom/room (up to 200 sf),82.09,772.31,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),49.08,80.11,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),49.08,121.07,SF,841.0,2102.06,-791.92,-1980.99,100,FLOOR COVERING,square_feet,False,False,,-1636.24,True,Medium-Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),351.93,549.01,SF,3500.0,5586.0,-3148.07,-5036.99,100,PAINTING,square_feet,False,False,,-917.47,True,Medium-High
+Seal stud wall for odor control (shellac),351.93,646.52,SF,3500.0,6497.62,-3148.07,-5851.1,100,PAINTING,square_feet,False,False,,-905.01,True,High
+Clean floor or roof joist system,82.09,152.84,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Seal floor or ceiling joist system (shellac),82.09,202.5,SF,841.0,2102.06,-758.91,-1899.56,100,FLOOR COVERING,square_feet,False,False,,-938.05,True,Medium-Low
+Deodorize building - Ozone & hydroxyl treatment,584.64,42.1,CF,30.33,1.82,554.31,40.28,87,CLEANING,cubic_feet,False,False,,95.68,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",49.08,276.56,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,49.08,83.01,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",351.93,1913.04,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,351.93,595.25,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Carpet pad,82.09,73.04,SF,1567.0,1409.78,-1484.91,-1336.74,100,FLOOR COVERING,square_feet,False,False,,-1830.15,True,Low
+Carpet,94.41,554.82,SF,1802.05,10727.48,-1707.6399999999999,-10172.66,100,FLOOR COVERING,square_feet,False,False,,-1833.51,True,Medium-High
+"Step charge for ""waterfall"" carpet installation",16.0,322.2,EA,,,,,0,ACCESSORIES - MOBILE HOME,each,False,False,,,False,Medium-High
+R&R Balustrade - High grade,15.67,6060.99,LF,18.0,6886.29,-2.33,-825.3000000000002,92,BALUSTRADE,linear_feet,False,False,,-13.62,True,High
+Stain & finish balustrade,15.67,812.25,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,High
+R&R Stair Skirt/Apron - open side - hardwood,15.67,2024.78,LF,29.58,3740.31,-13.909999999999998,-1715.53,95,FLOOR COVERING,linear_feet,False,False,,-84.73,True,High
+Stain & finish stair skirt/apron,15.67,224.99,LF,29.58,429.96,-13.909999999999998,-204.96999999999997,100,PAINTING,linear_feet,False,False,,-91.1,True,Medium-Low
+Seal & paint stair stringer - one side,15.67,122.82,LF,32.0,253.81,-16.33,-130.99,100,PAINTING,linear_feet,False,False,,-106.65,True,Medium-Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",21.36,120.36,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Seal/prime (1 coat) then paint (1 coat) the surface area*,21.36,36.13,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",89.73,487.76,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the surface area*,89.73,151.76,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Carpet pad,15.94,14.19,SF,1567.0,1409.78,-1551.06,-1395.59,100,FLOOR COVERING,square_feet,False,False,,-9835.02,True,Low
+Carpet,18.33,107.73,SF,1802.05,10727.48,-1783.72,-10619.75,100,FLOOR COVERING,square_feet,False,False,,-9857.75,True,Medium-Low
+"Step charge for ""tucked"" carpet installation - High grade",16.0,467.56,EA,,,,,0,ACCESSORIES - MOBILE HOME,each,False,False,,,False,Medium-High
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Baseboard - 2 1/4""",15.06,79.53,LF,587.0,3758.84,-571.94,-3679.31,94,FINISH CARPENTRY,linear_feet,False,False,,-4626.32,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,15.06,40.32,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Closet shelf and rod package,3.33,126.28,LF,3.0,120.82,0.33000000000000007,5.460000000000008,100,CABINETRY,linear_feet,False,False,,4.32,False,Medium-Low
+Seal & paint closet shelving,3.33,53.09,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+"Batt insulation - 4"" - R15 - paper / foil faced",1182.77,2061.3,SF,2970.0,4284.47,-1787.23,-2223.17,98,OFFICE SUPPLIES,square_feet,False,False,,-107.85,True,High
+"Batt insulation - 10"" - R30 - unfaced batt",826.54,1936.46,SF,917.0,1446.05,-90.46000000000004,490.4100000000001,92,HVAC,square_feet,False,False,,25.33,True,High
+Demolish/remove - bedroom/room (up to 200 sf),91.22,858.2,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),91.22,148.88,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-Low
+Seal attic framing (shellac) - 6 to 8/12,91.22,263.7,SF,2000.0,5848.32,-1908.78,-5584.62,100,WINDOWS,square_feet,False,False,,-2117.79,True,Medium-High
+HEPA Vacuuming exposed framing - Walls - (PER SF),403.45,629.39,SF,3500.0,5586.0,-3096.55,-4956.61,100,PAINTING,square_feet,False,False,,-787.53,True,High
+Seal stud wall for odor control (shellac),403.45,741.17,SF,3500.0,6497.62,-3096.55,-5756.45,100,PAINTING,square_feet,False,False,,-776.67,True,High
+Clean floor or roof joist system,91.22,169.85,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Seal floor or ceiling joist system (shellac),91.22,225.03,SF,841.0,2102.06,-749.78,-1877.03,100,FLOOR COVERING,square_feet,False,False,,-834.12,True,Medium-Low
+Deodorize building - Ozone & hydroxyl treatment,821.02,59.12,CF,30.33,1.82,790.6899999999999,57.3,87,CLEANING,cubic_feet,False,False,,96.92,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",91.22,513.99,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,91.22,154.29,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",403.45,2193.1,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,403.45,682.4,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Carpet pad,91.22,81.17,SF,1567.0,1409.78,-1475.78,-1328.61,100,FLOOR COVERING,square_feet,False,False,,-1636.82,True,Low
+Carpet,104.91,616.52,SF,1802.05,10727.48,-1697.1399999999999,-10110.96,100,FLOOR COVERING,square_feet,False,False,,-1640.01,True,Medium-High
+Balustrade - High grade,15.0,5655.5,LF,18.0,6886.29,-3.0,-1230.79,100,BALUSTRADE,linear_feet,False,False,,-21.76,True,High
+Stain & finish balustrade,15.0,777.51,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,High
+"Baseboard - 2 1/4""",31.15,164.49,LF,587.0,3758.84,-555.85,-3594.3500000000004,94,FINISH CARPENTRY,linear_feet,False,False,,-2185.15,True,Medium-Low
+Seal (1 coat) & paint (1 coat) baseboard*,31.15,83.42,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+"Custom cabinets - wall units - 36"" tall",6.5,2038.92,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,High
+Add for prefinished crown molding per LF,6.5,104.71,LF,15.0,245.35,-8.5,-140.64,100,PAINTING,linear_feet,False,False,,-134.31,True,Medium-Low
+Custom cabinets - base units,6.5,2904.76,LF,,,,,0,SPECIALTY ITEMS,linear_feet,False,False,,,False,High
+Countertop - wood - butcher block (hardrock maple),13.0,1403.28,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,High
+Light fixture,2.0,229.12,EA,1.0,116.17,1.0,112.95,100,ELECTRICAL,each,False,False,,49.3,True,Medium-High
+Thermostat,1.0,164.42,EA,,,,,0,HVAC,each,False,False,,,False,Medium-Low
+Demolish/remove - bedroom/room (up to 200 sf),93.74,881.9,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),93.74,152.99,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-Low
+Seal attic framing (shellac) - 6 to 8/12,93.74,270.99,SF,2000.0,5848.32,-1906.26,-5577.33,100,WINDOWS,square_feet,False,False,,-2058.13,True,Medium-High
+HEPA Vacuuming exposed framing - Walls - (PER SF),269.4,420.26,SF,3500.0,5586.0,-3230.6,-5165.74,100,PAINTING,square_feet,False,False,,-1229.18,True,Medium-High
+Seal stud wall for odor control (shellac),269.4,494.9,SF,3500.0,6497.62,-3230.6,-6002.72,100,PAINTING,square_feet,False,False,,-1212.92,True,Medium-High
+Clean floor or roof joist system,93.74,174.54,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Seal floor or ceiling joist system (shellac),93.74,231.25,SF,841.0,2102.06,-747.26,-1870.81,100,FLOOR COVERING,square_feet,False,False,,-809.0,True,Medium-High
+Deodorize building - Ozone & hydroxyl treatment,843.7,60.74,CF,30.33,1.82,813.37,58.92,87,CLEANING,cubic_feet,False,False,,97.0,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",93.74,528.2,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,93.74,158.55,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",269.4,1464.41,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,269.4,455.67,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Carpet pad,93.74,83.4,SF,1567.0,1409.78,-1473.26,-1326.3799999999999,100,FLOOR COVERING,square_feet,False,False,,-1590.38,True,Low
+Carpet,107.81,633.58,SF,1802.05,10727.48,-1694.24,-10093.9,100,FLOOR COVERING,square_feet,False,False,,-1593.15,True,High
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Aluminum window, horiz. slider 24-32 sf (2 pane)",1.0,623.14,EA,2.0,1404.83,-1.0,-781.6899999999999,96,SIDING,each,False,False,,-125.44,True,High
+Add on for grid (double or triple glazed windows),24.0,129.86,SF,328.0,1801.36,-304.0,-1671.5,100,WINDOWS,square_feet,False,False,,-1287.16,True,Medium-Low
+Window stool & apron,6.0,82.89,LF,103.5,1455.35,-97.5,-1372.4599999999998,100,TOOLS,linear_feet,False,False,,-1655.76,True,Low
+Seal & paint window stool and apron,6.0,42.74,LF,103.5,745.68,-97.5,-702.9399999999999,100,PAINTING,linear_feet,False,False,,-1644.69,True,Low
+"Baseboard - 2 1/4""",30.7,162.09,LF,587.0,3758.84,-556.3,-3596.75,94,FINISH CARPENTRY,linear_feet,False,False,,-2218.98,True,Medium-Low
+Seal (1 coat) & paint (1 coat) baseboard*,30.7,82.21,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Ceiling fan & light,1.0,556.01,EA,1.0,563.76,0.0,-7.75,100,PAINTING,each,False,False,,-1.39,False,Medium-High
+"Window blind - PVC - 2"" - 20.1 to 32 SF",1.0,228.15,EA,1.0,231.54,0.0,-3.3899999999999864,100,WINDOWS,each,False,False,,-1.49,False,Medium-High
+Demolish/remove - bedroom/room (up to 200 sf),15.14,142.44,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,Medium-Low
+HEPA Vacuuming - Detailed - (PER SF),15.14,24.71,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal attic framing (shellac) - 6 to 8/12,15.14,43.77,SF,2000.0,5848.32,-1984.86,-5804.549999999999,100,WINDOWS,square_feet,False,False,,-13261.48,True,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),138.29,215.74,SF,3500.0,5586.0,-3361.71,-5370.26,100,PAINTING,square_feet,False,False,,-2489.23,True,Medium-Low
+Seal stud wall for odor control (shellac),138.29,254.04,SF,3500.0,6497.62,-3361.71,-6243.58,100,PAINTING,square_feet,False,False,,-2457.72,True,Medium-High
+Clean floor or roof joist system,15.14,28.2,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),15.14,37.35,SF,841.0,2102.06,-825.86,-2064.71,100,FLOOR COVERING,square_feet,False,False,,-5528.01,True,Low
+Deodorize building - Ozone & hydroxyl treatment,136.28,9.82,CF,30.33,1.82,105.95,8.0,87,CLEANING,cubic_feet,False,False,,81.47,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",15.14,85.32,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,15.14,25.59,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",138.29,751.73,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,138.29,233.9,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Carpet pad,15.14,13.47,SF,1567.0,1409.78,-1551.86,-1396.31,100,FLOOR COVERING,square_feet,False,False,,-10366.07,True,Low
+Carpet,17.41,102.31,SF,1802.05,10727.48,-1784.6399999999999,-10625.17,100,FLOOR COVERING,square_feet,False,False,,-10385.27,True,Medium-Low
+Bypass (sliding) door set - Colonist,1.0,399.84,EA,2.0,811.56,-1.0,-411.71999999999997,100,DOORS,each,False,False,,-102.97,True,Medium-High
+"Door opening (jamb & casing) - 60"" or wider - paint grade",1.0,363.98,EA,,,,,0,OFFICE SUPPLIES,each,False,False,,,False,Medium-High
+Seal 1coat & paint 1coat bypass dr set-slab only(per side)*,2.0,160.69,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening - Large (per side)*,2.0,139.83,EA,,,,,0,OFFICE SUPPLIES,each,False,False,per side,,False,Medium-Low
+Closet Organizer - Melamine,7.0,1022.88,LF,,,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,High
+"Baseboard - 2 1/4""",14.07,74.29,LF,587.0,3758.84,-572.93,-3684.55,94,FINISH CARPENTRY,linear_feet,False,False,,-4959.69,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,14.07,37.67,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Demolish/remove - bedroom/room (up to 200 sf),196.62,1849.8,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),212.83,347.35,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-High
+Seal attic framing (shellac) - 6 to 8/12,212.83,615.25,SF,2000.0,5848.32,-1787.17,-5233.07,100,WINDOWS,square_feet,False,False,,-850.56,True,Medium-High
+HEPA Vacuuming exposed framing - Walls - (PER SF),554.72,865.36,SF,3500.0,5586.0,-2945.2799999999997,-4720.64,100,PAINTING,square_feet,False,False,,-545.51,True,High
+Seal stud wall for odor control (shellac),554.72,1019.05,SF,3500.0,6497.62,-2945.2799999999997,-5478.57,100,PAINTING,square_feet,False,False,,-537.62,True,High
+Clean floor or roof joist system,196.62,366.1,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-High
+Seal floor or ceiling joist system (shellac),196.62,485.04,SF,841.0,2102.06,-644.38,-1617.02,100,FLOOR COVERING,square_feet,False,False,,-333.38,True,Medium-High
+Deodorize building - Ozone & hydroxyl treatment,2309.77,166.31,CF,30.33,1.82,2279.44,164.49,87,CLEANING,cubic_feet,False,False,,98.91,True,Medium-Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",212.83,1199.23,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,212.83,359.97,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",554.72,3015.38,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,554.72,938.26,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Carpet pad,196.62,174.93,SF,1567.0,1409.78,-1370.38,-1234.85,100,FLOOR COVERING,square_feet,False,False,,-705.91,True,Medium-Low
+Carpet,226.11,1328.8,SF,1802.05,10727.48,-1575.94,-9398.68,100,FLOOR COVERING,square_feet,False,False,,-707.31,True,High
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Aluminum window, horiz. slider 24-32 sf (2 pane)",1.0,623.14,EA,2.0,1404.83,-1.0,-781.6899999999999,96,SIDING,each,False,False,,-125.44,True,High
+Add on for grid (double or triple glazed windows),24.0,129.86,SF,328.0,1801.36,-304.0,-1671.5,100,WINDOWS,square_feet,False,False,,-1287.16,True,Medium-Low
+Window stool & apron,6.0,82.89,LF,103.5,1455.35,-97.5,-1372.4599999999998,100,TOOLS,linear_feet,False,False,,-1655.76,True,Low
+Seal & paint window stool and apron,6.0,42.74,LF,103.5,745.68,-97.5,-702.9399999999999,100,PAINTING,linear_feet,False,False,,-1644.69,True,Low
+"Baseboard - 2 1/4""",44.59,235.43,LF,587.0,3758.84,-542.41,-3523.4100000000003,94,FINISH CARPENTRY,linear_feet,False,False,,-1496.58,True,Medium-High
+Seal (1 coat) & paint (1 coat) baseboard*,44.59,119.4,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Medium-Low
+Ceiling fan & light,1.0,556.01,EA,1.0,563.76,0.0,-7.75,100,PAINTING,each,False,False,,-1.39,False,Medium-High
+"Add on - Ceiling fan down rod - 19""-36""",1.0,71.43,EA,,,,,0,PAINTING,each,False,False,,,False,Low
+"Window blind - PVC - 2"" - 20.1 to 32 SF",1.0,228.15,EA,1.0,231.54,0.0,-3.3899999999999864,100,WINDOWS,each,False,False,,-1.49,False,Medium-High
+Demolish/remove - bedroom/room (up to 200 sf),38.94,366.35,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,Medium-High
+HEPA Vacuuming - Detailed - (PER SF),38.94,63.56,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal attic framing (shellac) - 6 to 8/12,38.94,112.57,SF,2000.0,5848.32,-1961.06,-5735.75,100,WINDOWS,square_feet,False,False,,-5095.27,True,Medium-Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),214.41,334.47,SF,3500.0,5586.0,-3285.59,-5251.53,100,PAINTING,square_feet,False,False,,-1570.1,True,Medium-High
+Seal stud wall for odor control (shellac),214.41,393.88,SF,3500.0,6497.62,-3285.59,-6103.74,100,PAINTING,square_feet,False,False,,-1549.64,True,Medium-High
+Clean floor or roof joist system,38.94,72.52,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),38.94,96.07,SF,841.0,2102.06,-802.06,-2005.99,100,FLOOR COVERING,square_feet,False,False,,-2088.05,True,Medium-Low
+Deodorize building - Ozone & hydroxyl treatment,350.47,25.23,CF,30.33,1.82,320.14000000000004,23.41,87,CLEANING,cubic_feet,False,False,,92.79,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",38.94,219.41,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,38.94,65.86,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",214.41,1165.51,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,214.41,362.65,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Carpet pad,38.94,34.66,SF,1567.0,1409.78,-1528.06,-1375.12,100,FLOOR COVERING,square_feet,False,False,,-3967.46,True,Low
+Carpet,44.78,263.15,SF,1802.05,10727.48,-1757.27,-10464.33,100,FLOOR COVERING,square_feet,False,False,,-3976.56,True,Medium-High
+Bypass mirrored door set,1.0,443.24,EA,1.0,449.81,0.0,-6.569999999999993,100,DOORS,each,False,False,,-1.48,False,Medium-High
+"Door opening (jamb & casing) - 60"" or wider - paint grade",1.0,363.98,EA,,,,,0,OFFICE SUPPLIES,each,False,False,,,False,Medium-High
+Seal & paint door opening - Large (per side)*,2.0,139.83,EA,,,,,0,OFFICE SUPPLIES,each,False,False,per side,,False,Medium-Low
+Closet Organizer - Melamine,13.0,1899.61,LF,,,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,High
+"Baseboard - 2 1/4""",22.27,117.59,LF,587.0,3758.84,-564.73,-3641.25,94,FINISH CARPENTRY,linear_feet,False,False,,-3096.56,True,Medium-Low
+Seal (1 coat) & paint (1 coat) baseboard*,22.27,59.62,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Demolish/remove - bathroom (over 50 sf),57.59,1326.87,SF,,,,,0,CABINETRY,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),62.49,101.99,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-Low
+Seal attic framing (shellac) - 6 to 8/12,62.49,180.65,SF,2000.0,5848.32,-1937.51,-5667.67,100,WINDOWS,square_feet,False,False,,-3137.38,True,Medium-Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),333.76,520.67,SF,3500.0,5586.0,-3166.24,-5065.33,100,PAINTING,square_feet,False,False,,-972.85,True,Medium-High
+Seal stud wall for odor control (shellac),333.76,613.13,SF,3500.0,6497.62,-3166.24,-5884.49,100,PAINTING,square_feet,False,False,,-959.75,True,Medium-High
+Clean floor or roof joist system,57.59,107.23,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Seal floor or ceiling joist system (shellac),57.59,142.06,SF,841.0,2102.06,-783.41,-1960.0,100,FLOOR COVERING,square_feet,False,False,,-1379.7,True,Medium-Low
+Deodorize building - Ozone & hydroxyl treatment,698.82,50.31,CF,30.33,1.82,668.49,48.49,87,CLEANING,cubic_feet,False,False,,96.38,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",62.49,352.11,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,62.49,105.7,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",333.76,1814.28,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Add for bullnose (rounded) corners - per LF,23.5,161.97,LF,,,,,0,BULLNOSE,linear_feet,False,False,,,False,Medium-Low
+Seal/prime (1 coat) then paint (1 coat) the walls*,333.76,564.52,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+"1/2"" Cement board",30.59,304.33,SF,,,,,0,CONCRETE & ASPHALT,square_feet,False,False,,,False,Medium-High
+Stone floor covering,30.59,767.18,SF,101.0,2592.36,-70.41,-1825.1800000000003,100,FLOOR COVERING,square_feet,False,False,,-237.91,True,High
+Tile/stone sealer,30.59,63.38,SF,41.58,86.92,-10.989999999999998,-23.54,100,FLOOR COVERING,square_feet,False,False,,-37.14,True,Low
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Aluminum window, picture/fixed 3-11 sf (2 pane)",2.0,509.3,EA,1.0,303.13,1.0,206.17000000000002,96,SIDING,each,False,False,,40.48,True,Medium-High
+Add on for grid (double or triple glazed windows),15.5,83.86,SF,328.0,1801.36,-312.5,-1717.5,100,WINDOWS,square_feet,False,False,,-2048.06,True,Low
+"Baseboard - 2 1/4""",7.62,40.24,LF,587.0,3758.84,-579.38,-3718.6000000000004,94,FINISH CARPENTRY,linear_feet,False,False,,-9241.05,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,7.62,20.4,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Medicine cabinet,1.0,270.25,EA,1.0,274.28,0.0,-4.029999999999973,100,CABINETRY,each,False,False,,-1.49,False,Medium-High
+Vanity,6.0,2134.41,LF,4.25,1534.41,1.75,599.9999999999998,100,CABINETRY,linear_feet,False,False,,28.11,True,High
+Vanity top - two sinks - cultured marble - High grade,6.0,1525.82,LF,,,,,0,OFFICE SUPPLIES,linear_feet,False,False,,,False,High
+"Mirror - 1/4"" plate glass",24.0,582.87,SF,6.0,147.82,18.0,435.05,100,WINDOWS,square_feet,False,False,,74.64,True,Medium-High
+Add metal J channel to a mirror,6.0,32.86,LF,10.0,55.53,-4.0,-22.67,100,STEEL COMPONENTS,linear_feet,False,False,,-68.99,True,Low
+Tile tub surround - up to 60 SF,1.0,2488.92,EA,1.0,2515.2,0.0,-26.279999999999745,100,FLOOR COVERING,each,False,False,,-1.06,False,High
+"1/2"" Cement board",55.0,545.87,SF,,,,,0,CONCRETE & ASPHALT,square_feet,False,False,,,False,Medium-High
+Tile/stone sealer,55.0,113.97,SF,41.58,86.92,13.420000000000002,27.049999999999997,100,FLOOR COVERING,square_feet,False,False,,23.73,True,Medium-Low
+Bathtub - High grade,1.0,1727.81,EA,,,,,0,PLUMBING,each,False,False,,,False,High
+Bathtub enclosure - sliding glass doors - High grade,1.0,825.56,EA,1.0,837.79,0.0,-12.230000000000018,100,PLUMBING,each,False,False,,-1.48,False,High
+Sink faucet - Bathroom,2.0,678.89,EA,1.0,343.91,1.0,334.97999999999996,100,OFFICE SUPPLIES,each,False,False,,49.34,True,High
+Tub/shower faucet,1.0,507.57,EA,1.0,379.89,0.0,127.68,87,PLUMBING,each,False,False,,25.16,True,Medium-High
+Angle stop valve,4.0,253.08,EA,2.0,128.02,2.0,125.06,100,PLUMBING,each,False,False,,49.42,True,Medium-High
+P-trap assembly - ABS (plastic),2.0,236.67,EA,1.0,119.66,1.0,117.00999999999999,100,PLUMBING FIXTURES,each,False,False,,49.44,True,Medium-High
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Light bar - 6 lights,1.0,177.64,EA,1.0,180.15,0.0,-2.5100000000000193,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Bathroom ventilation fan,1.0,161.35,EA,1.0,163.64,0.0,-2.289999999999992,100,ROOFING,each,False,False,,-1.42,False,Medium-Low
+Towel bar,2.0,87.04,EA,1.0,44.16,1.0,42.88000000000001,100,BATHROOM ACCESSORIES,each,False,False,,49.26,True,Medium-Low
+Demolish/remove - bathroom (up to 50 sf),13.73,365.27,SF,,,,,0,CABINETRY,square_feet,False,False,,,False,Medium-High
+HEPA Vacuuming - Detailed - (PER SF),13.73,22.41,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal attic framing (shellac) - 6 to 8/12,13.73,39.68,SF,2000.0,5848.32,-1986.27,-5808.639999999999,100,WINDOWS,square_feet,False,False,,-14638.71,True,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),114.99,179.39,SF,3500.0,5586.0,-3385.01,-5406.61,100,PAINTING,square_feet,False,False,,-3013.89,True,Medium-Low
+Seal stud wall for odor control (shellac),114.99,211.25,SF,3500.0,6497.62,-3385.01,-6286.37,100,PAINTING,square_feet,False,False,,-2975.8,True,Medium-Low
+Clean floor or roof joist system,13.73,25.57,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),13.73,33.86,SF,841.0,2102.06,-827.27,-2068.2,100,FLOOR COVERING,square_feet,False,False,,-6108.09,True,Low
+Deodorize building - Ozone & hydroxyl treatment,109.85,7.91,CF,30.33,1.82,79.52,6.09,87,CLEANING,cubic_feet,False,False,,76.99,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",13.73,77.36,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,13.73,23.22,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",114.99,625.08,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,114.99,194.49,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+"1/2"" Cement board",13.73,136.6,SF,,,,,0,CONCRETE & ASPHALT,square_feet,False,False,,,False,Medium-Low
+Tile floor covering,13.73,319.79,SF,261.0,6144.38,-247.27,-5824.59,100,FLOOR COVERING,square_feet,False,False,,-1821.38,True,Medium-High
+Tile/stone sealer,13.73,28.44,SF,41.58,86.92,-27.849999999999998,-58.480000000000004,100,FLOOR COVERING,square_feet,False,False,,-205.63,True,Low
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Baseboard - 2 1/4""",13.96,73.7,LF,587.0,3758.84,-573.04,-3685.1400000000003,94,FINISH CARPENTRY,linear_feet,False,False,,-5000.19,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,13.96,37.38,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Toilet,1.0,807.65,EA,1.0,818.11,0.0,-10.460000000000036,100,PLUMBING,each,False,False,,-1.3,False,High
+Toilet seat,1.0,88.48,EA,,,,,0,PLUMBING,each,False,False,,,False,Medium-Low
+Angle stop valve,1.0,63.26,EA,2.0,128.02,-1.0,-64.76000000000002,100,PLUMBING,each,False,False,,-102.37,True,Low
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Bathroom ventilation fan,1.0,161.35,EA,1.0,163.64,0.0,-2.289999999999992,100,ROOFING,each,False,False,,-1.42,False,Medium-Low
+Toilet paper holder,1.0,39.98,EA,1.0,40.57,0.0,-0.5900000000000034,100,OFFICE SUPPLIES,each,False,False,,-1.48,False,Low
+Demolish/remove - bathroom (up to 50 sf),39.18,1042.34,SF,,,,,0,CABINETRY,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),39.18,63.94,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal attic framing (shellac) - 6 to 8/12,39.18,113.27,SF,2000.0,5848.32,-1960.82,-5735.049999999999,100,WINDOWS,square_feet,False,False,,-5063.17,True,Medium-Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),213.32,332.78,SF,3500.0,5586.0,-3286.68,-5253.22,100,PAINTING,square_feet,False,False,,-1578.59,True,Medium-High
+Seal stud wall for odor control (shellac),213.32,391.88,SF,3500.0,6497.62,-3286.68,-6105.74,100,PAINTING,square_feet,False,False,,-1558.06,True,Medium-High
+Clean floor or roof joist system,39.18,72.95,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),39.18,96.64,SF,841.0,2102.06,-801.82,-2005.4199999999998,100,FLOOR COVERING,square_feet,False,False,,-2075.14,True,Medium-Low
+Deodorize building - Ozone & hydroxyl treatment,352.63,25.4,CF,30.33,1.82,322.3,23.58,87,CLEANING,cubic_feet,False,False,,92.83,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",39.18,220.76,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,39.18,66.28,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",213.32,1159.58,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,213.32,360.8,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+"1/2"" Cement board",19.65,195.48,SF,,,,,0,CONCRETE & ASPHALT,square_feet,False,False,,,False,Medium-Low
+Stone floor covering,19.65,492.81,SF,101.0,2592.36,-81.35,-2099.55,100,FLOOR COVERING,square_feet,False,False,,-426.04,True,Medium-High
+Tile/stone sealer,19.65,40.72,SF,41.58,86.92,-21.93,-46.2,100,FLOOR COVERING,square_feet,False,False,,-113.46,True,Low
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Baseboard - 2 1/4""",6.54,34.52,LF,587.0,3758.84,-580.46,-3724.32,94,FINISH CARPENTRY,linear_feet,False,False,,-10788.88,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,6.54,17.51,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Medicine cabinet,1.0,270.25,EA,1.0,274.28,0.0,-4.029999999999973,100,CABINETRY,each,False,False,,-1.49,False,Medium-High
+Vanity,4.25,1511.88,LF,4.25,1534.41,0.0,-22.529999999999973,100,CABINETRY,linear_feet,False,False,,-1.49,False,High
+Vanity top - one sink - cultured marble,6.67,1228.96,LF,6.67,1243.75,0.0,-14.789999999999964,100,OFFICE SUPPLIES,linear_feet,False,False,,-1.2,False,High
+"Mirror - 1/4"" plate glass",24.0,582.87,SF,6.0,147.82,18.0,435.05,100,WINDOWS,square_feet,False,False,,74.64,True,Medium-High
+Add metal J channel to a mirror,6.0,32.86,LF,10.0,55.53,-4.0,-22.67,100,STEEL COMPONENTS,linear_feet,False,False,,-68.99,True,Low
+Tile tub surround - up to 60 SF,1.0,2488.92,EA,1.0,2515.2,0.0,-26.279999999999745,100,FLOOR COVERING,each,False,False,,-1.06,False,High
+"1/2"" Cement board",55.0,545.87,SF,,,,,0,CONCRETE & ASPHALT,square_feet,False,False,,,False,Medium-High
+Tile/stone sealer,55.0,113.97,SF,41.58,86.92,13.420000000000002,27.049999999999997,100,FLOOR COVERING,square_feet,False,False,,23.73,True,Medium-Low
+Bathtub - High grade,1.0,1727.81,EA,,,,,0,PLUMBING,each,False,False,,,False,High
+Bathtub enclosure - sliding glass doors - High grade,1.0,825.56,EA,1.0,837.79,0.0,-12.230000000000018,100,PLUMBING,each,False,False,,-1.48,False,High
+Sink faucet - Bathroom,1.0,339.44,EA,1.0,343.91,0.0,-4.470000000000027,100,OFFICE SUPPLIES,each,False,False,,-1.32,False,Medium-High
+Tub/shower faucet,1.0,507.57,EA,1.0,379.89,0.0,127.68,87,PLUMBING,each,False,False,,25.16,True,Medium-High
+Toilet,1.0,807.65,EA,1.0,818.11,0.0,-10.460000000000036,100,PLUMBING,each,False,False,,-1.3,False,High
+Toilet seat,1.0,88.48,EA,,,,,0,PLUMBING,each,False,False,,,False,Medium-Low
+Angle stop valve,3.0,189.8,EA,2.0,128.02,1.0,61.78,100,PLUMBING,each,False,False,,32.55,True,Medium-Low
+P-trap assembly - ABS (plastic),1.0,118.34,EA,1.0,119.66,0.0,-1.3199999999999932,100,PLUMBING FIXTURES,each,False,False,,-1.12,False,Medium-Low
+Light fixture,1.0,114.56,EA,1.0,116.17,0.0,-1.6099999999999994,100,ELECTRICAL,each,False,False,,-1.41,False,Medium-Low
+Light bar - 5 lights,1.0,169.8,EA,1.0,172.17,0.0,-2.369999999999976,100,ELECTRICAL,each,False,False,,-1.4,False,Medium-Low
+Bathroom ventilation fan,1.0,161.35,EA,1.0,163.64,0.0,-2.289999999999992,100,ROOFING,each,False,False,,-1.42,False,Medium-Low
+Towel bar,2.0,87.04,EA,1.0,44.16,1.0,42.88000000000001,100,BATHROOM ACCESSORIES,each,False,False,,49.26,True,Medium-Low
+Toilet paper holder,1.0,39.98,EA,1.0,40.57,0.0,-0.5900000000000034,100,OFFICE SUPPLIES,each,False,False,,-1.48,False,Low
+Demolish/remove - bedroom/room (up to 200 sf),109.08,1026.23,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),117.07,191.06,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-Low
+Seal attic framing (shellac) - 6 to 8/12,117.07,338.44,SF,2000.0,5848.32,-1882.93,-5509.88,100,WINDOWS,square_feet,False,False,,-1628.02,True,Medium-High
+HEPA Vacuuming exposed framing - Walls - (PER SF),260.67,406.65,SF,3500.0,5586.0,-3239.33,-5179.35,100,PAINTING,square_feet,False,False,,-1273.66,True,Medium-High
+Seal stud wall for odor control (shellac),260.67,478.87,SF,3500.0,6497.62,-3239.33,-6018.75,100,PAINTING,square_feet,False,False,,-1256.87,True,Medium-High
+Clean floor or roof joist system,109.08,203.1,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Seal floor or ceiling joist system (shellac),109.08,269.08,SF,841.0,2102.06,-731.92,-1832.98,100,FLOOR COVERING,square_feet,False,False,,-681.2,True,Medium-High
+Deodorize building - Ozone & hydroxyl treatment,945.25,68.06,CF,30.33,1.82,914.92,66.24000000000001,87,CLEANING,cubic_feet,False,False,,97.33,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",117.07,659.66,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,117.07,198.01,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",260.67,1416.97,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,260.67,440.89,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Carpet pad,109.08,97.06,SF,1567.0,1409.78,-1457.92,-1312.72,100,FLOOR COVERING,square_feet,False,False,,-1352.48,True,Medium-Low
+Carpet,125.45,737.23,SF,1802.05,10727.48,-1676.6,-9990.25,100,FLOOR COVERING,square_feet,False,False,,-1355.11,True,High
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Aluminum window, horiz. slider 24-32 sf (2 pane)",1.0,623.14,EA,2.0,1404.83,-1.0,-781.6899999999999,96,SIDING,each,False,False,,-125.44,True,High
+Add on for grid (double or triple glazed windows),24.0,129.86,SF,328.0,1801.36,-304.0,-1671.5,100,WINDOWS,square_feet,False,False,,-1287.16,True,Medium-Low
+Window stool & apron,6.0,82.89,LF,103.5,1455.35,-97.5,-1372.4599999999998,100,TOOLS,linear_feet,False,False,,-1655.76,True,Low
+Seal & paint window stool and apron,6.0,42.74,LF,103.5,745.68,-97.5,-702.9399999999999,100,PAINTING,linear_feet,False,False,,-1644.69,True,Low
+"Baseboard - 2 1/4""",34.33,181.26,LF,587.0,3758.84,-552.67,-3577.58,94,FINISH CARPENTRY,linear_feet,False,False,,-1973.73,True,Medium-Low
+Seal (1 coat) & paint (1 coat) baseboard*,34.33,91.92,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Medium-Low
+Ceiling fan & light,1.0,556.01,EA,1.0,563.76,0.0,-7.75,100,PAINTING,each,False,False,,-1.39,False,Medium-High
+"Window blind - PVC - 2"" - 20.1 to 32 SF",1.0,228.15,EA,1.0,231.54,0.0,-3.3899999999999864,100,WINDOWS,each,False,False,,-1.49,False,Medium-High
+Demolish/remove - bedroom/room (up to 200 sf),11.83,111.31,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,Medium-Low
+HEPA Vacuuming - Detailed - (PER SF),11.83,19.31,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal attic framing (shellac) - 6 to 8/12,11.83,34.19,SF,2000.0,5848.32,-1988.17,-5814.13,100,WINDOWS,square_feet,False,False,,-17005.35,True,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),109.17,170.3,SF,3500.0,5586.0,-3390.83,-5415.7,100,PAINTING,square_feet,False,False,,-3180.09,True,Medium-Low
+Seal stud wall for odor control (shellac),109.17,200.56,SF,3500.0,6497.62,-3390.83,-6297.0599999999995,100,PAINTING,square_feet,False,False,,-3139.74,True,Medium-Low
+Clean floor or roof joist system,11.83,22.02,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),11.83,29.19,SF,841.0,2102.06,-829.17,-2072.87,100,FLOOR COVERING,square_feet,False,False,,-7101.3,True,Low
+Deodorize building - Ozone & hydroxyl treatment,106.5,7.67,CF,30.33,1.82,76.17,5.85,87,CLEANING,cubic_feet,False,False,,76.27,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",11.83,66.66,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,11.83,20.0,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",109.17,593.43,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the walls*,109.17,184.66,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Carpet pad,11.83,10.53,SF,1567.0,1409.78,-1555.17,-1399.25,100,FLOOR COVERING,square_feet,False,False,,-13288.22,True,Low
+Carpet,13.61,79.98,SF,1802.05,10727.48,-1788.44,-10647.5,100,FLOOR COVERING,square_feet,False,False,,-13312.7,True,Low
+Bypass (sliding) door set - Colonist,1.0,399.84,EA,2.0,811.56,-1.0,-411.71999999999997,100,DOORS,each,False,False,,-102.97,True,Medium-High
+"Door opening (jamb & casing) - 60"" or wider - paint grade",1.0,363.98,EA,,,,,0,OFFICE SUPPLIES,each,False,False,,,False,Medium-High
+Seal 1coat & paint 1coat bypass dr set-slab only(per side)*,2.0,160.69,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening - Large (per side)*,2.0,139.83,EA,,,,,0,OFFICE SUPPLIES,each,False,False,per side,,False,Medium-Low
+Closet Organizer - Melamine,5.92,865.06,LF,,,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,High
+"Baseboard - 2 1/4""",10.83,57.19,LF,587.0,3758.84,-576.17,-3701.65,94,FINISH CARPENTRY,linear_feet,False,False,,-6472.55,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,10.83,28.99,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Demolish/remove - bedroom/room (up to 200 sf),100.0,940.8,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,High
+HEPA Vacuuming - Detailed - (PER SF),107.55,175.53,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Medium-Low
+Seal attic framing (shellac) - 6 to 8/12,107.55,310.9,SF,2000.0,5848.32,-1892.45,-5537.42,100,WINDOWS,square_feet,False,False,,-1781.09,True,Medium-High
+HEPA Vacuuming exposed framing - Walls - (PER SF),246.0,383.76,SF,3500.0,5586.0,-3254.0,-5202.24,100,PAINTING,square_feet,False,False,,-1355.6,True,Medium-High
+Seal stud wall for odor control (shellac),246.0,451.91,SF,3500.0,6497.62,-3254.0,-6045.71,100,PAINTING,square_feet,False,False,,-1337.81,True,Medium-High
+Clean floor or roof joist system,100.0,186.2,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Medium-Low
+Seal floor or ceiling joist system (shellac),100.0,246.69,SF,841.0,2102.06,-741.0,-1855.37,100,FLOOR COVERING,square_feet,False,False,,-752.11,True,Medium-High
+Deodorize building - Ozone & hydroxyl treatment,865.34,62.3,CF,30.33,1.82,835.01,60.48,87,CLEANING,cubic_feet,False,False,,97.08,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",107.55,606.01,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,107.55,181.91,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",246.0,1337.23,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,246.0,416.08,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-High
+Carpet pad,100.0,88.97,SF,1567.0,1409.78,-1467.0,-1320.81,100,FLOOR COVERING,square_feet,False,False,,-1484.56,True,Medium-Low
+Carpet,115.0,675.84,SF,1802.05,10727.48,-1687.05,-10051.64,100,FLOOR COVERING,square_feet,False,False,,-1487.28,True,High
+Interior door - Colonist - pre-hung unit,1.0,450.7,EA,,,,,0,DOORS,each,False,False,,,False,Medium-High
+Seal & paint door slab only (per side),2.0,136.23,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening (per side)*,2.0,112.02,EA,17.0,966.15,-15.0,-854.13,87,OFFICE SUPPLIES,each,False,False,per side,-762.48,True,Medium-Low
+Door knob - interior,1.0,63.67,EA,,,,,0,DOORS,each,False,False,,,False,Low
+"Aluminum window, horiz. slider 24-32 sf (2 pane)",1.0,623.14,EA,2.0,1404.83,-1.0,-781.6899999999999,96,SIDING,each,False,False,,-125.44,True,High
+Add on for grid (double or triple glazed windows),24.0,129.86,SF,328.0,1801.36,-304.0,-1671.5,100,WINDOWS,square_feet,False,False,,-1287.16,True,Medium-Low
+Window stool & apron,6.0,82.89,LF,103.5,1455.35,-97.5,-1372.4599999999998,100,TOOLS,linear_feet,False,False,,-1655.76,True,Low
+Seal & paint window stool and apron,6.0,42.74,LF,103.5,745.68,-97.5,-702.9399999999999,100,PAINTING,linear_feet,False,False,,-1644.69,True,Low
+"Baseboard - 2 1/4""",32.5,171.61,LF,587.0,3758.84,-554.5,-3587.23,94,FINISH CARPENTRY,linear_feet,False,False,,-2090.34,True,Medium-Low
+Seal (1 coat) & paint (1 coat) baseboard*,32.5,87.03,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Medium-Low
+Ceiling fan & light,1.0,556.01,EA,1.0,563.76,0.0,-7.75,100,PAINTING,each,False,False,,-1.39,False,Medium-High
+"Window blind - PVC - 2"" - 20.1 to 32 SF",1.0,228.15,EA,1.0,231.54,0.0,-3.3899999999999864,100,WINDOWS,each,False,False,,-1.49,False,Medium-High
+Demolish/remove - bedroom/room (up to 200 sf),12.67,119.19,SF,,,,,0,FURNITURE,square_feet,False,False,,,False,Medium-Low
+HEPA Vacuuming - Detailed - (PER SF),12.67,20.67,SF,,,,,0,CLEANING,square_feet,False,False,,,False,Low
+Seal attic framing (shellac) - 6 to 8/12,12.67,36.62,SF,2000.0,5848.32,-1987.33,-5811.7,100,WINDOWS,square_feet,False,False,,-15870.29,True,Low
+HEPA Vacuuming exposed framing - Walls - (PER SF),116.67,182.01,SF,3500.0,5586.0,-3383.33,-5403.99,100,PAINTING,square_feet,False,False,,-2969.06,True,Medium-Low
+Seal stud wall for odor control (shellac),116.67,214.33,SF,3500.0,6497.62,-3383.33,-6283.29,100,PAINTING,square_feet,False,False,,-2931.6,True,Medium-Low
+Clean floor or roof joist system,12.67,23.58,SF,,,,,0,FLOOR COVERING,square_feet,False,False,,,False,Low
+Seal floor or ceiling joist system (shellac),12.67,31.25,SF,841.0,2102.06,-828.33,-2070.81,100,FLOOR COVERING,square_feet,False,False,,-6626.59,True,Low
+Deodorize building - Ozone & hydroxyl treatment,114.0,8.2,CF,30.33,1.82,83.67,6.379999999999999,87,CLEANING,cubic_feet,False,False,,77.8,True,Low
+"5/8"" drywall - hung, taped, heavy texture, ready for paint",12.67,71.39,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+Seal/prime (1 coat) then paint (1 coat) the ceiling*,12.67,21.43,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Low
+"1/2"" drywall - hung, taped, heavy texture, ready for paint",116.67,634.21,SF,,,,,0,PAINTING,square_feet,False,False,,,False,High
+Seal/prime (1 coat) then paint (1 coat) the walls*,116.67,197.34,SF,,,,,0,PAINTING,square_feet,False,False,,,False,Medium-Low
+Carpet pad,12.67,11.28,SF,1567.0,1409.78,-1554.33,-1398.5,100,FLOOR COVERING,square_feet,False,False,,-12398.05,True,Low
+Carpet,14.57,85.63,SF,1802.05,10727.48,-1787.48,-10641.85,100,FLOOR COVERING,square_feet,False,False,,-12427.71,True,Low
+Bypass (sliding) door set - Colonist,1.0,399.84,EA,2.0,811.56,-1.0,-411.71999999999997,100,DOORS,each,False,False,,-102.97,True,Medium-High
+"Door opening (jamb & casing) - 60"" or wider - paint grade",1.0,363.98,EA,,,,,0,OFFICE SUPPLIES,each,False,False,,,False,Medium-High
+Seal 1coat & paint 1coat bypass dr set-slab only(per side)*,2.0,160.69,EA,,,,,0,PAINTING,each,False,False,per side,,False,Medium-Low
+Seal & paint door opening - Large (per side)*,2.0,139.83,EA,,,,,0,OFFICE SUPPLIES,each,False,False,per side,,False,Medium-Low
+Closet Organizer - Melamine,6.33,924.98,LF,,,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,High
+"Baseboard - 2 1/4""",11.67,61.62,LF,587.0,3758.84,-575.33,-3697.2200000000003,94,FINISH CARPENTRY,linear_feet,False,False,,-6000.03,True,Low
+Seal (1 coat) & paint (1 coat) baseboard*,11.67,31.25,LF,,,,,0,PAINTING,linear_feet,False,False,,,False,Low
+Haul debris - per pickup truck load - including dump fees,1.0,272.73,EA,,,,,0,DUMPSTER & DEBRIS,each,False,False,,,False,Medium-High
+R&R Pergola - Pre-manufactured Kit - Cedar,112.0,4683.5,SF,75.0,3183.77,37.0,1499.73,100,HVAC,square_feet,False,False,,32.02,True,High
+Seal & paint trim - two coats,260.0,661.87,LF,260.0,668.83,0.0,-6.960000000000036,100,PAINTING,linear_feet,False,False,,-1.05,False,High
+General Demolition - per hour,2.0,176.84,HR,,,,,0,DEMOLITION & LABOR,hours,False,True,,,False,Medium-Low
+Power distribution box - 100+ amp (per week),,,WK,8.0,3456.0,,,0,ELECTRICAL,weeks,False,False,per week,,False,
+Allowance for PPE *,,,EA,1.0,623.99,,,0,SAFETY EQUIPMENT,each,False,False,,,False,
+HEPA Vacuuming - Detailed *,,,SF,2000.0,1992.0,,,0,CLEANING,square_feet,False,False,,,False,
+"Remove Batt insulation - 6"" - R19 - unfaced batt",,,SF,917.0,517.19,,,0,HVAC,square_feet,False,False,,,False,
+"Remove Baseboard - 3 1/4""",,,LF,587.0,436.72,,,0,FINISH CARPENTRY,linear_feet,False,False,,,False,
+"Tear out wet non-salvageable carpet, cut/bag - Cat 3 water",,,SF,1567.0,3171.91,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+"Tear out wet carpet pad, cut/bag - Category 3 water",,,SF,1567.0,2983.87,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+Remove Stone floor covering,,,SF,101.0,500.55,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+Remove Tile floor covering,,,SF,261.0,1293.51,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+Remove Interior door unit,,,EA,11.0,408.27,,,0,DOORS,each,False,False,,,False,
+Remove Pedestal sink,,,EA,1.0,49.48,,,0,OFFICE SUPPLIES,each,False,False,,,False,
+Remove Toilet,,,EA,1.0,49.48,,,0,PLUMBING,each,False,False,,,False,
+Remove Vanity,,,LF,4.25,63.14,,,0,CABINETRY,linear_feet,False,False,,,False,
+Remove Toilet,,,EA,1.0,49.48,,,0,PLUMBING,each,False,False,,,False,
+Remove Bathtub,,,EA,1.0,148.46,,,0,PLUMBING,each,False,False,,,False,
+Remove Vanity,,,LF,5.5,81.71,,,0,CABINETRY,linear_feet,False,False,,,False,
+Remove Toilet,,,EA,1.0,49.48,,,0,PLUMBING,each,False,False,,,False,
+Remove Bathtub,,,EA,1.0,148.46,,,0,PLUMBING,each,False,False,,,False,
+Remove Tile tub surround - 60 to 75 SF,,,EA,1.0,296.35,,,0,FLOOR COVERING,each,False,False,,,False,
+"Remove Fireplace, zero clnce, gas burning, w/venting - High grade",,,EA,1.0,593.87,,,0,ROOFING,each,False,False,,,False,
+Remove Newel post - turned,,,EA,2.0,98.98,,,0,STAIRS,each,False,False,,,False,
+Remove Newel post - turned,,,EA,2.0,98.98,,,0,STAIRS,each,False,False,,,False,
+"Remove Tile roofing - Concrete - ""S"" or flat tile",,,SQ,0.64,241.08,,,0,FLOOR COVERING,square,False,False,,,False,
+"Tile roofing - Concrete - ""S"" or flat tile",,,SQ,0.64,672.21,,,0,FLOOR COVERING,square,False,False,,,False,
+Labor to set up and take down scaffold - per section,,,EA,63.0,3576.63,,,0,SCAFFOLDING,each,False,True,,,False,
+R&R Siding - hardboard - sheet,,,SF,622.5,3699.58,,,0,SIDING,square_feet,False,False,,,False,
+R&R Siding - hardboard - sheet,,,SF,212.8,1264.68,,,0,SIDING,square_feet,False,False,,,False,
+"R&R Trim board - 1"" x 4"" - installed (cedar)",,,LF,260.0,2022.39,,,0,FINISH CARPENTRY,linear_feet,False,False,,,False,
+Flashing - Sill pan flashing - plastic - up to 4.5' sill,,,EA,3.0,253.94,,,0,ROOFING,each,False,False,,,False,
+Flashing - Sill pan flashing - plastic - greater than 4.5',,,EA,3.0,334.15,,,0,ROOFING,each,False,False,,,False,
+"Patio door screen, 36"" wide",,,EA,2.0,225.83,,,0,WINDOWS,each,False,False,,,False,
+Flashing - Sill pan flashing - plastic - up to 4.5' sill,,,EA,3.0,253.94,,,0,ROOFING,each,False,False,,,False,
+Flashing - Sill pan flashing - plastic - up to 4.5' sill,,,EA,5.0,423.23,,,0,ROOFING,each,False,False,,,False,
+Flashing - Sill pan flashing - plastic - greater than 4.5',,,EA,4.0,445.52,,,0,ROOFING,each,False,False,,,False,
+Urethane foam sealant,,,LF,260.0,397.3,,,0,WINDOWS,linear_feet,False,False,,,False,
+"Additional charge for a retrofit window, 3-11 sf",,,EA,2.0,329.15,,,0,WINDOWS,each,False,False,,,False,
+"Additional charge for a retrofit window, 12-23 sf",,,EA,10.0,2297.97,,,0,WINDOWS,each,False,False,,,False,
+"Additional charge for a retrofit window, 24-40 sf",,,EA,5.0,1479.46,,,0,WINDOWS,each,False,False,,,False,
+"Add on for ""Low E"" glass",,,SF,328.0,1710.62,,,0,WINDOWS,square_feet,False,False,,,False,
+"Mask and prep for paint - plastic, paper, tape (per LF)",,,LF,310.26,754.43,,,0,OFFICE SUPPLIES,linear_feet,False,False,per LF,,False,
+Seal & paint double garage door opening & trim,,,EA,1.0,227.43,,,0,OFFICE SUPPLIES,each,False,False,,,False,
+Exterior - seal or prime then paint with two finish coats,,,SF,2880.0,8081.86,,,0,PAINTING,square_feet,False,False,,,False,
+"1/2"" drywall - walls*",,,SF,7142.0,29458.82,,,0,PAINTING,square_feet,False,False,,,False,
+"5/8"" drywall - ceilings*",,,SF,1824.0,7864.64,,,0,PAINTING,square_feet,False,False,,,False,
+Texture drywall - machine Walls & Ceilings*,,,SF,8966.0,11026.83,,,0,PAINTING,square_feet,False,False,,,False,
+Window sill,,,LF,103.5,564.21,,,0,WINDOWS,linear_feet,False,False,,,False,
+Grout sealer,,,SF,261.0,891.24,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+Add on to tear out mortar bed for tile,,,SF,361.0,1160.98,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+Interior door unit,,,EA,11.0,5046.68,,,0,DOORS,each,False,False,,,False,
+Sink - double basin - High grade,,,EA,1.0,814.83,,,0,OFFICE SUPPLIES,each,False,False,,,False,
+Plumbing fixture supply line,,,EA,2.0,72.6,,,0,PLUMBING,each,False,False,,,False,
+Robe hook,,,EA,1.0,26.28,,,0,BATHROOM ACCESSORIES,each,False,False,,,False,
+Robe hook,,,EA,1.0,26.28,,,0,BATHROOM ACCESSORIES,each,False,False,,,False,
+Tub/shower faucet - High grade,,,EA,1.0,625.81,,,0,PLUMBING,each,False,False,,,False,
+Bathtub,,,EA,1.0,1481.49,,,0,PLUMBING,each,False,False,,,False,
+Robe hook,,,EA,1.0,26.28,,,0,BATHROOM ACCESSORIES,each,False,False,,,False,
+Sink faucet - Bathroom - High grade,,,EA,1.0,429.85,,,0,OFFICE SUPPLIES,each,False,False,,,False,
+Shower head only,,,EA,1.0,97.08,,,0,PLUMBING,each,False,False,,,False,
+Tub/shower faucet - High grade,,,EA,1.0,625.81,,,0,PLUMBING,each,False,False,,,False,
+Bathtub,,,EA,1.0,1481.49,,,0,PLUMBING,each,False,False,,,False,
+"Fireplace, zero clnce, gas burning, w/venting - High grade",,,EA,1.0,5303.49,,,0,ROOFING,each,False,False,,,False,
+Fireplace mantel - paint grade - prefab.,,,EA,1.0,860.04,,,0,PAINTING,each,False,False,,,False,
+Newel post - turned,,,EA,2.0,709.58,,,0,STAIRS,each,False,False,,,False,
+Newel post - turned,,,EA,2.0,709.58,,,0,STAIRS,each,False,False,,,False,
+Refrigerator - Reset,,,EA,1.0,42.63,,,0,UNCATEGORIZED,each,False,False,,,False,
+Dishwasher,,,EA,1.0,938.95,,,0,CLEANING,each,False,False,,,False,
+Dishwasher connection,,,EA,1.0,267.84,,,0,CLEANING,each,False,False,,,False,
+"Ductwork - flexible - insulated - 4"" round",,,LF,12.0,164.28,,,0,HVAC,linear_feet,False,False,,,False,
+Install Range - freestanding - gas,,,EA,1.0,302.42,,,0,APPLIANCES,each,False,False,,,False,
+Washing machine hose line - rubber (per pair),,,EA,1.0,62.41,,,0,CLEANING,each,False,False,per pair,,False,
+Clothes dryer vent - installed,,,EA,1.0,109.48,,,0,ROOFING,each,False,False,,,False,
+"Custom cabinet panels - side, end, or back - High grade",,,SF,30.0,1208.72,,,0,SIDING,square_feet,False,False,,,False,
+Cabinet knob or pull - High grade,,,EA,1.0,19.0,,,0,CABINETRY,each,False,False,,,False,
+"Ceramic tile - bullnose - 3/4"" x 6""",,,LF,19.5,382.82,,,0,FLOOR COVERING,linear_feet,False,False,,,False,
+"Toe kick - pre-finished wood - 1/2""",,,LF,16.67,259.58,,,0,FLOOR COVERING,linear_feet,False,False,,,False,
+Stain & finish cabinetry - upper - inside and out,,,LF,5.67,572.05,,,0,PAINTING,linear_feet,False,False,,,False,
+Stain & finish full height cabinetry - inside and out,,,LF,1.0,156.59,,,0,PAINTING,linear_feet,False,False,,,False,
+"Window sill - tile on 2"" x 6"" wall",,,LF,18.0,462.36,,,0,FLOOR COVERING,linear_feet,False,False,,,False,
+Fluorescent - four tube - 4' - fixture w/lens,,,EA,1.0,215.26,,,0,PLUMBING,each,False,False,,,False,
+"Light diffusing panel - Premium grade (i.e., egg crate)",,,SF,16.0,66.75,,,0,SIDING,square_feet,False,False,,,False,
+"Material Only Cabinet panels - side, end, or back",,,SF,16.0,162.04,,,0,SIDING,square_feet,False,False,,,False,
+"Carpenter - Finish, Trim / Cabinet - per hour",,,HR,8.0,1173.4,,,0,OFFICE SUPPLIES,hours,False,True,,,False,
+Painter - per hour,,,HR,1.0,124.8,,,0,PAINTING,hours,False,True,,,False,
+Mask per square foot for drywall work,,,SF,7142.0,3306.9,,,0,PAINTING,square_feet,False,False,,,False,
+"Floor protection - cloth - skid resistant, leak proof",,,SF,1824.0,2657.46,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+Seal/prime then paint walls twice *,,,SF,7142.0,16858.41,,,0,PAINTING,square_feet,False,False,,,False,
+Seal/prime then paint ceiling twice. *,,,SF,1824.0,4305.48,,,0,PAINTING,square_feet,False,False,,,False,
+Seal & paint window sill,,,LF,103.5,480.79,,,0,PAINTING,linear_feet,False,False,,,False,
+Paint baseboard - two coats,,,LF,587.0,1533.17,,,0,PAINTING,linear_feet,False,False,,,False,
+Paint door slab only - 2 coats (per side),,,EA,22.0,1501.86,,,0,PAINTING,each,False,False,per side,,False,
+Paint door/window trim & jamb - Large - 2 coats (per side),,,EA,22.0,1473.22,,,0,PAINTING,each,False,False,per side,,False,
+Paint bypass door set - slab only - 2 coats (per side),,,EA,4.0,352.38,,,0,PAINTING,each,False,False,per side,,False,
+Seal & paint fireplace mantel,,,LF,5.0,47.14,,,0,PAINTING,linear_feet,False,False,,,False,
+Stain and finish Balustrade - Landing & Stairs*,,,LF,32.0,1679.0,,,0,PAINTING,linear_feet,False,False,,,False,
+15' rolling Scaffold*,,,WK,8.0,1053.6,,,0,SCAFFOLDING,weeks,False,False,,,False,
+Electrician - General Laborer - per hour,,,HR,8.0,636.0,,,0,ELECTRICAL,hours,False,True,,,False,
+Rewire\wire - avg. residence - boxes & wiring,,,SF,2185.11,15371.99,,,0,ELECTRICAL,square_feet,False,False,,,False,
+R&R Air handler - with A-coil - 3 ton,,,EA,1.0,3084.04,,,0,HVAC,each,False,False,,,False,
+"R&R Sheathing - plywood - 5/8"" - tongue and groove",,,SF,32.0,240.03,,,0,FLOOR COVERING,square_feet,False,False,,,False,
+R&R remove and replace blocking between ends of floor trusses*,,,LF,4.0,212.99,,,0,FLOOR COVERING,linear_feet,False,False,,,False,
+Chandelier - High grade,,,EA,1.0,568.36,,,0,LIGHTING & ELECTRICAL,each,False,False,,,False,
+"Add on - Ceiling fan down rod - 37""-72"" - High/Prem grade",,,EA,1.0,138.56,,,0,PAINTING,each,False,False,,,False,
+R&R Lighting Installer - Electrician - per hour,,,HR,3.0,573.56,,,0,ELECTRICAL,hours,False,True,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+Smoke detector,,,EA,1.0,98.69,,,0,SMOKE & SAFETY DEVICES,each,False,False,,,False,
+Seal & paint closet shelving - single shelf,,,EA,1.0,93.81,,,0,PAINTING,each,False,False,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+Smoke detector,,,EA,1.0,98.69,,,0,SMOKE & SAFETY DEVICES,each,False,False,,,False,
+"Phone, TV, or speaker outlet",,,EA,1.0,33.95,,,0,ELECTRICAL,each,False,False,,,False,
+Phone/low voltage outlet rough-in,,,EA,1.0,99.48,,,0,ELECTRICAL,each,False,False,,,False,
+"Shelving - 24"" - in place",,,LF,9.0,213.73,,,0,HVAC,linear_feet,False,False,,,False,
+Hanging light fixture,,,EA,1.0,145.44,,,0,ELECTRICAL,each,False,False,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+Smoke detector,,,EA,1.0,98.69,,,0,SMOKE & SAFETY DEVICES,each,False,False,,,False,
+"Phone, TV, or speaker outlet",,,EA,1.0,33.95,,,0,ELECTRICAL,each,False,False,,,False,
+Phone/low voltage outlet rough-in,,,EA,1.0,99.48,,,0,ELECTRICAL,each,False,False,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+Exhaust fan,,,EA,1.0,362.78,,,0,VENTILATION,each,False,False,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+"Phone, TV, or speaker outlet",,,EA,1.0,33.95,,,0,ELECTRICAL,each,False,False,,,False,
+Phone/low voltage outlet rough-in,,,EA,1.0,99.48,,,0,ELECTRICAL,each,False,False,,,False,
+Closet Organizer - Melamine - High grade,,,LF,6.33,1337.03,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+"Phone, TV, or speaker outlet",,,EA,1.0,33.95,,,0,ELECTRICAL,each,False,False,,,False,
+Phone/low voltage outlet rough-in,,,EA,1.0,99.48,,,0,ELECTRICAL,each,False,False,,,False,
+Closet Organizer - Melamine - High grade,,,LF,6.0,1267.33,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+"Phone, TV, or speaker outlet",,,EA,1.0,33.95,,,0,ELECTRICAL,each,False,False,,,False,
+Phone/low voltage outlet rough-in,,,EA,1.0,99.48,,,0,ELECTRICAL,each,False,False,,,False,
+Closet Organizer - Melamine - High grade,,,LF,11.0,2323.43,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,
+Heat/AC register - Mechanically attached,,,EA,1.0,38.1,,,0,HVAC,each,False,False,,,False,
+"Phone, TV, or speaker outlet",,,EA,1.0,33.95,,,0,ELECTRICAL,each,False,False,,,False,
+Phone/low voltage outlet rough-in,,,EA,1.0,99.48,,,0,ELECTRICAL,each,False,False,,,False,
+Closet Organizer - Melamine - High grade,,,LF,7.75,1636.98,,,0,CLOSET ORGANIZATION,linear_feet,False,False,,,False,
+General Laborer - per hour,,,HR,160.0,12720.0,,,0,DEMOLITION & LABOR,hours,False,True,,,False,
+Engineering fees (Bid Item),,,EA,1.0,0.0,,,0,PERMITS & FEES,each,False,False,,,False,
+Architectural/Drafting fees (Bid Item),,,EA,1.0,0.0,,,0,PERMITS & FEES,each,False,False,,,False,
+"Taxes, insurance, permits & fees (Bid Item)",,,EA,1.0,0.0,,,0,PERMITS & FEES,each,False,False,,,False,
