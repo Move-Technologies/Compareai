@@ -46,7 +46,6 @@ CORS(app)
 # Remove this line since we're not using the setup function
 # setup_tesseract()
 
-client = openai.OpenAI(api_key="enter key here")
 UNIT_STANDARDIZATION = {
     'SF': 'square_feet',
     'LF': 'linear_feet',
