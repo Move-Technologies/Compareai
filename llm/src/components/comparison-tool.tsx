@@ -199,8 +199,8 @@ const ComparisonApp = () => {
       formData.append("file2", files.file2);
 
       const response = await fetch(
-        // "https://hunter10471.eu.pythonanywhere.com/api/compare",
-        "http://localhost:5000/api/compare",
+        "https://hunter10471.eu.pythonanywhere.com/api/compare",
+        // "http://localhost:5000/api/compare",
         {
           method: "POST",
           body: formData,
@@ -839,56 +839,6 @@ const ComparisonApp = () => {
 
       {result && (
         <div className="mt-8 space-y-6">
-          {/* Overall Summary Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Overall Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Items in Your Estimate
-                  </p>
-                  <p className="text-2xl font-bold">{result.file1_count}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Items in Carrier's Estimate
-                  </p>
-                  <p className="text-2xl font-bold">{result.file2_count}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Total Discrepancies</p>
-                  <p className="text-2xl font-bold">
-                    {result.overall_summary.total_discrepancies}
-                  </p>
-                </div>
-                {/* <div>
-                  <p className="text-sm text-gray-500">Cost Difference</p>
-                  <p className="text-2xl font-bold">
-                    {formatCurrency(
-                      result.overall_summary.total_cost_difference
-                    )}
-                  </p>
-                </div> */}
-                <div>
-                  <p className="text-sm text-gray-500">Average Difference</p>
-                  <p className="text-2xl font-bold">
-                    {formatPercentage(
-                      result.overall_summary.average_difference_percentage
-                    )}
-                    %
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* AI Insights */}
-          {renderAIInsights(result.ai_insights)}
-
-          {/* Rest of your existing tabs structure */}
           <Tabs defaultValue="appraiser" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="appraiser">Appraiser's View</TabsTrigger>
@@ -897,8 +847,67 @@ const ComparisonApp = () => {
               <TabsTrigger value="unique">Unique Items</TabsTrigger>
             </TabsList>
 
-            {/* Categories Tab */}
+            {/* Appraiser View Tab */}
+            <TabsContent value="appraiser">
+              <AppraiserView data={result} />
+            </TabsContent>
+
+            {/* Other Views - Wrapped in a separate TabsContent */}
             <TabsContent value="categories">
+              {/* Overall Summary Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Overall Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        Items in Your Estimate
+                      </p>
+                      <p className="text-2xl font-bold">{result.file1_count}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        Items in Carrier's Estimate
+                      </p>
+                      <p className="text-2xl font-bold">{result.file2_count}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        Total Discrepancies
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {result.overall_summary.total_discrepancies}
+                      </p>
+                    </div>
+                    {/* <div>
+                      <p className="text-sm text-gray-500">Cost Difference</p>
+                      <p className="text-2xl font-bold">
+                        {formatCurrency(
+                          result.overall_summary.total_cost_difference
+                        )}
+                      </p>
+                    </div> */}
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        Average Difference
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {formatPercentage(
+                          result.overall_summary.average_difference_percentage
+                        )}
+                        %
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* AI Insights */}
+              {renderAIInsights(result.ai_insights)}
+
+              {/* Categories Content */}
               <Accordion type="single" collapsible className="w-full">
                 {Object.entries(result.categorized_items).map(
                   ([category, details]) => {
@@ -1056,9 +1065,6 @@ const ComparisonApp = () => {
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-            <TabsContent value="appraiser">
-              <AppraiserView data={result} />
             </TabsContent>
           </Tabs>
         </div>

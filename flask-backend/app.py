@@ -26,7 +26,7 @@ CORS(app)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'pdf'}
 
-client = openai.OpenAI(api_key="")
+client = openai.OpenAI(api_key="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")
 
 
 UNIT_STANDARDIZATION = {

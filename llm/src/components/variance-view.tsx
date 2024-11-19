@@ -45,8 +45,8 @@ const VarianceComparison = ({ data }: { data: any }) => {
             <thead>
               <tr className="border-b">
                 <th className="text-left py-2">Category</th>
-                <th className="text-right py-2">Estimate 1</th>
-                <th className="text-right py-2">Estimate 2</th>
+                <th className="text-right py-2">Your Estimate</th>
+                <th className="text-right py-2">Carrier's Estimate</th>
                 <th className="text-right py-2">Variance</th>
               </tr>
             </thead>
@@ -74,9 +74,9 @@ const VarianceComparison = ({ data }: { data: any }) => {
                       </td>
                       <td
                         className={`text-right py-2 ${
-                          variance < 0
+                          variance > 0
                             ? "text-red-600"
-                            : variance > 0
+                            : variance < 0
                             ? "text-green-600"
                             : ""
                         }`}
@@ -97,7 +97,7 @@ const VarianceComparison = ({ data }: { data: any }) => {
                 </td>
                 <td
                   className={`text-right py-2 ${
-                    totals.varianceTotal < 0 ? "text-red-600" : "text-green-600"
+                    totals.varianceTotal > 0 ? "text-red-600" : "text-green-600"
                   }`}
                 >
                   {formatCurrency(totals.varianceTotal)}
