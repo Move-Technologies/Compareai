@@ -548,6 +548,43 @@ def are_specs_compatible(specs1: dict, specs2: dict) -> bool:
     
     return True
 
+def clean_description(description):
+    """
+    Clean description by removing trailing quantity and cost information.
+    Example: 'Floor leveling cement - Average 212.83SF 2.36 23.12 105.08 630.48 (0.00) 630.48'
+    -> 'Floor leveling cement - Average'
+    """
+    if not description:
+        return ''
+        
+    # Pattern to match quantity/cost information at the end of description
+    # Matches patterns like: 212.83SF 2.36 23.12 105.08 630.48 (0.00) 630.48
+    pattern = r'\s+\d+\.?\d*(?:SF|EA|LF|HR|MO|WK|CF|DA|SQ)?\s+[-\d\.,\s\(\)]+$'
+    
+    # Remove the trailing numbers and units
+    cleaned = re.sub(pattern, '', description)
+    return cleaned.strip()
+
+def extract_unit(value_str):
+    """
+    Extract unit from strings like '8.00MO', '120.00LF', or '12 LF'
+    """
+    if not value_str or pd.isna(value_str):
+        return 'EA'  # Default unit
+    try:
+        # First clean the description if it contains embedded quantities
+        value_str = clean_description(str(value_str))
+        
+        # Extract unit part using regex, handling both cases:
+        # - Units directly after number (8.00MO)
+        # - Units with space after number (12 LF)
+        match = re.search(r'\s*([A-Za-z]+)$', str(value_str))
+        if match:
+            return match.group(1).upper()
+        return 'EA'  # Default unit
+    except (ValueError, TypeError):
+        return 'EA'  # Default unit
+
 def find_best_match(description: str, items_list: list, threshold: float = 80) -> tuple:
     """
     Find the best matching item from a list based on description similarity.
@@ -557,22 +594,28 @@ def find_best_match(description: str, items_list: list, threshold: float = 80) -
         best_match = None
         best_ratio = 0
         
-        # Extract key characteristics from the description
-        desc_specs = extract_specifications(description)
+        # Clean the input description
+        cleaned_desc = clean_description(description)
+        
+        # Extract key characteristics from the cleaned description
+        desc_specs = extract_specifications(cleaned_desc)
         
         # Get base description without action words for better matching
-        base_desc = re.sub(r'^(remove|install|replace|repair)\s+', '', description.lower().strip())
+        base_desc = re.sub(r'^(remove|install|replace|repair)\s+', '', cleaned_desc.lower().strip())
         
         for item in items_list:
+            # Clean the comparison description
+            cleaned_item_desc = clean_description(item['description'])
+            
             # Extract specifications from potential match
-            item_specs = extract_specifications(item['description'])
+            item_specs = extract_specifications(cleaned_item_desc)
             
             # If specifications are different, skip this match
             if not are_specs_compatible(desc_specs, item_specs):
                 continue
             
             # Get base description for comparison item
-            item_base_desc = re.sub(r'^(remove|install|replace|repair)\s+', '', item['description'].lower().strip())
+            item_base_desc = re.sub(r'^(remove|install|replace|repair)\s+', '', cleaned_item_desc.lower().strip())
             
             # Calculate similarity ratio using token sort ratio for better partial matching
             ratio = fuzz.token_sort_ratio(base_desc, item_base_desc)
@@ -600,23 +643,6 @@ def extract_numeric_value(value_str):
         return 0.0
     except (ValueError, TypeError):
         return 0.0
-
-def extract_unit(value_str):
-    """
-    Extract unit from strings like '8.00MO', '120.00LF', or '12 LF'
-    """
-    if not value_str or pd.isna(value_str):
-        return 'EA'  # Default unit
-    try:
-        # Extract unit part using regex, handling both cases:
-        # - Units directly after number (8.00MO)
-        # - Units with space after number (12 LF)
-        match = re.search(r'\s*([A-Za-z]+)$', str(value_str))
-        if match:
-            return match.group(1).upper()
-        return 'EA'  # Default unit
-    except (ValueError, TypeError):
-        return 'EA'  # Default unit
 
 def compare_line_items(items1, items2):
     """Compare line items with occurrence tracking"""
@@ -763,7 +789,7 @@ def prepare_categorized_items(analysis_df, comparison_results):
         items = []
         for _, row in group.iterrows():
             item_data = {
-                'description': row['description'],
+                'description': clean_description(row['description']),  # Clean the description here
                 'doc1_quantity': float(row['doc1_quantity']) if pd.notnull(row['doc1_quantity']) else None,
                 'doc2_quantity': float(row['doc2_quantity']) if pd.notnull(row['doc2_quantity']) else None,
                 'doc1_cost': float(row['doc1_cost']) if pd.notnull(row['doc1_cost']) else None,
@@ -781,7 +807,7 @@ def prepare_categorized_items(analysis_df, comparison_results):
             # Add additional fields from all_items_data if it exists
             all_items_data = next(
                 (item for item in comparison_results['all_items_comparison'] 
-                 if item['description'] == row['description']),
+                 if clean_description(item['description']) == clean_description(row['description'])),  # Clean descriptions for comparison
                 None
             )
             

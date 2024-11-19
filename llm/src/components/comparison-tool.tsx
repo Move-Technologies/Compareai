@@ -199,8 +199,8 @@ const ComparisonApp = () => {
       formData.append("file2", files.file2);
 
       const response = await fetch(
-        "https://hunter10471.eu.pythonanywhere.com/api/compare",
-        // "http://localhost:5000/api/compare",
+        // "https://hunter10471.eu.pythonanywhere.com/api/compare",
+        "http://localhost:5000/api/compare",
         {
           method: "POST",
           body: formData,
