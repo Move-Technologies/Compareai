@@ -26,6 +26,7 @@ CORS(app)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'pdf'}
 
+client = openai.OpenAI(api_key="")
 
 
 UNIT_STANDARDIZATION = {
@@ -601,14 +602,18 @@ def extract_numeric_value(value_str):
         return 0.0
 
 def extract_unit(value_str):
-    """Extract unit from strings like '8.00MO' or '120.00LF'"""
+    """
+    Extract unit from strings like '8.00MO', '120.00LF', or '12 LF'
+    """
     if not value_str or pd.isna(value_str):
         return 'EA'  # Default unit
     try:
-        # Extract unit part using regex
-        match = re.search(r'[A-Za-z]+$', str(value_str))
+        # Extract unit part using regex, handling both cases:
+        # - Units directly after number (8.00MO)
+        # - Units with space after number (12 LF)
+        match = re.search(r'\s*([A-Za-z]+)$', str(value_str))
         if match:
-            return match.group(0).upper()
+            return match.group(1).upper()
         return 'EA'  # Default unit
     except (ValueError, TypeError):
         return 'EA'  # Default unit
@@ -623,17 +628,26 @@ def compare_line_items(items1, items2):
         'unique_to_doc2': []
     }
     
+    # Track matched items from doc2 to avoid duplicates
+    matched_items_doc2 = set()
+    
     # Compare items
     for item1 in items1:
-        matched_item, match_ratio = find_best_match(item1['description'], items2)
+        matched_item, match_ratio = find_best_match(
+            item1['description'], 
+            [item for item in items2 if item['description'] not in matched_items_doc2]
+        )
         
         try:
             # Extract numeric values and units
             item1_quantity = extract_numeric_value(item1.get('quantity', 0))
             item1_unit = extract_unit(item1.get('quantity', 'EA'))
-            item1_cost = float(item1.get('rcv', 0)) # Use RCV as cost if total_cost not available
+            item1_cost = float(item1.get('rcv', 0))
             
             if matched_item:
+                # Add to tracked items to prevent future matches
+                matched_items_doc2.add(matched_item['description'])
+                
                 matched_quantity = extract_numeric_value(matched_item.get('quantity', 0))
                 matched_unit = extract_unit(matched_item.get('quantity', 'EA'))
                 matched_cost = float(matched_item.get('rcv', 0))
@@ -641,6 +655,13 @@ def compare_line_items(items1, items2):
                 quantity_diff = item1_quantity - matched_quantity if item1_unit == matched_unit else None
                 cost_diff = item1_cost - matched_cost
                 percentage_diff = (cost_diff / item1_cost * 100) if item1_cost != 0 else 0
+                
+                # Ensure we're getting the correct occurrence data
+                doc2_occurrences = matched_item.get('occurrence_summary', {
+                    'total_quantity': 0,
+                    'total_rcv': 0,
+                    'occurrences_detail': []
+                })
             else:
                 matched_quantity = None
                 matched_unit = None
@@ -648,6 +669,7 @@ def compare_line_items(items1, items2):
                 quantity_diff = None
                 cost_diff = None
                 percentage_diff = None
+                doc2_occurrences = None
             
             comparison_entry = {
                 'description': item1['description'],
@@ -661,11 +683,7 @@ def compare_line_items(items1, items2):
                     'total_rcv': 0,
                     'occurrences_detail': []
                 }),
-                'doc2_occurrences': matched_item.get('occurrence_summary', {
-                    'total_quantity': 0,
-                    'total_rcv': 0,
-                    'occurrences_detail': []
-                }) if matched_item else None,
+                'doc2_occurrences': doc2_occurrences,
                 'quantity_difference': quantity_diff,
                 'cost_difference': cost_diff,
                 'percentage_cost_difference': percentage_diff,
@@ -998,7 +1016,6 @@ def create_analysis_ready_dataframe(comparison_results):
         df['significant_difference'] = df['percentage_cost_difference'].apply(
             lambda x: abs(x) > 5 if pd.notnull(x) else False
         )
-        
         return df
     except Exception as e:
         logger.error(f"Error creating analysis-ready dataframe: {str(e)}")
