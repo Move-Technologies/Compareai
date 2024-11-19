@@ -17,6 +17,7 @@ import {
   type LineItem,
 } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AppraiserView from "./appraiser-view";
 
 const safeNumber = (value: any): number => {
   if (value === null || value === undefined) return 0;
@@ -48,6 +49,81 @@ const formatQuantity = (value: any): string => {
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "0";
   return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+};
+
+const combineRedundantItems = (items: any[]) => {
+  const combinedItems = items.reduce((acc, item) => {
+    const key = item.description?.toLowerCase().trim();
+    if (!key) return acc;
+
+    if (!acc[key]) {
+      acc[key] = { ...item };
+    } else {
+      // Combine costs
+      acc[key].doc1_cost =
+        safeNumber(acc[key].doc1_cost) + safeNumber(item.doc1_cost);
+      acc[key].doc2_cost =
+        safeNumber(acc[key].doc2_cost) + safeNumber(item.doc2_cost);
+
+      // Combine quantities
+      acc[key].doc1_quantity =
+        safeNumber(acc[key].doc1_quantity) + safeNumber(item.doc1_quantity);
+      acc[key].doc2_quantity =
+        safeNumber(acc[key].doc2_quantity) + safeNumber(item.doc2_quantity);
+
+      // Combine and deduplicate occurrences
+      if (item.doc1_occurrences && acc[key].doc1_occurrences) {
+        const existingDetails = new Set(
+          acc[key].doc1_occurrences.occurrences_detail
+        );
+        item.doc1_occurrences.occurrences_detail.forEach((detail: string) =>
+          existingDetails.add(detail)
+        );
+        acc[key].doc1_occurrences.occurrences_detail =
+          Array.from(existingDetails);
+        acc[key].doc1_occurrences.total_quantity =
+          safeNumber(acc[key].doc1_occurrences.total_quantity) +
+          safeNumber(item.doc1_occurrences.total_quantity);
+        acc[key].doc1_occurrences.total_rcv =
+          safeNumber(acc[key].doc1_occurrences.total_rcv) +
+          safeNumber(item.doc1_occurrences.total_rcv);
+      }
+
+      if (item.doc2_occurrences && acc[key].doc2_occurrences) {
+        const existingDetails = new Set(
+          acc[key].doc2_occurrences.occurrences_detail
+        );
+        item.doc2_occurrences.occurrences_detail.forEach((detail: string) =>
+          existingDetails.add(detail)
+        );
+        acc[key].doc2_occurrences.occurrences_detail =
+          Array.from(existingDetails);
+        acc[key].doc2_occurrences.total_quantity =
+          safeNumber(acc[key].doc2_occurrences.total_quantity) +
+          safeNumber(item.doc2_occurrences.total_quantity);
+        acc[key].doc2_occurrences.total_rcv =
+          safeNumber(acc[key].doc2_occurrences.total_rcv) +
+          safeNumber(item.doc2_occurrences.total_rcv);
+      }
+    }
+    return acc;
+  }, {});
+
+  return Object.values(combinedItems);
+};
+
+const adjustPageNumbers = (occurrences: any) => {
+  if (!occurrences?.occurrences_detail) return occurrences;
+
+  return {
+    ...occurrences,
+    occurrences_detail: occurrences.occurrences_detail.map((detail: string) => {
+      // Find page number in the detail string and increment it
+      return detail.replace(/Page (\d+)/i, (match, pageNum) => {
+        return `Page ${parseInt(pageNum) + 1}`;
+      });
+    }),
+  };
 };
 
 const ComparisonApp = () => {
@@ -188,8 +264,14 @@ const ComparisonApp = () => {
   console.log(result);
 
   const renderLineItem = (item: any) => {
-    // Early return if item is undefined
     if (!item) return null;
+
+    // Adjust page numbers in occurrences
+    const adjustedItem = {
+      ...item,
+      doc1_occurrences: adjustPageNumbers(item.doc1_occurrences),
+      doc2_occurrences: adjustPageNumbers(item.doc2_occurrences),
+    };
 
     // Safe access helper function
     const safe = (value: any, defaultValue: any = 0) => {
@@ -246,26 +328,6 @@ const ComparisonApp = () => {
                               </p>
                             )
                           )}
-
-                          {/* Occurrence Summary */}
-                          <div className="mt-3 pt-3 border-t">
-                            <p className="font-medium text-sm">Summary:</p>
-                            <div className="ml-4 text-sm text-gray-600">
-                              <p>
-                                Total Quantity:{" "}
-                                {formatQuantity(
-                                  safe(item.doc1_occurrences.total_quantity)
-                                )}{" "}
-                                {item.unit || "EA"}
-                              </p>
-                              <p>
-                                Total RCV:{" "}
-                                {formatCurrency(
-                                  safe(item.doc1_occurrences.total_rcv)
-                                )}
-                              </p>
-                            </div>
-                          </div>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -311,26 +373,6 @@ const ComparisonApp = () => {
                               </p>
                             )
                           )}
-
-                          {/* Occurrence Summary */}
-                          <div className="mt-3 pt-3 border-t">
-                            <p className="font-medium text-sm">Summary:</p>
-                            <div className="ml-4 text-sm text-gray-600">
-                              <p>
-                                Total Quantity:{" "}
-                                {formatQuantity(
-                                  safe(item.doc2_occurrences.total_quantity)
-                                )}{" "}
-                                {item.unit || "EA"}
-                              </p>
-                              <p>
-                                Total RCV:{" "}
-                                {formatCurrency(
-                                  safe(item.doc2_occurrences.total_rcv)
-                                )}
-                              </p>
-                            </div>
-                          </div>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -847,8 +889,9 @@ const ComparisonApp = () => {
           {renderAIInsights(result.ai_insights)}
 
           {/* Rest of your existing tabs structure */}
-          <Tabs defaultValue="categories" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs defaultValue="appraiser" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="appraiser">Appraiser's View</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="discrepancies">Discrepancies</TabsTrigger>
               <TabsTrigger value="unique">Unique Items</TabsTrigger>
@@ -858,99 +901,105 @@ const ComparisonApp = () => {
             <TabsContent value="categories">
               <Accordion type="single" collapsible className="w-full">
                 {Object.entries(result.categorized_items).map(
-                  ([category, details]) => (
-                    <AccordionItem key={category} value={category}>
-                      <AccordionTrigger className="hover:no-underline">
-                        <div className="flex flex-1 justify-between items-center">
-                          <span className="font-medium">{category}</span>
-                          <span className="text-sm text-gray-500">
-                            Difference:{" "}
-                            {formatCurrency(
-                              details?.summary?.total_cost_difference
-                            )}
-                          </span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-4">
-                          {/* Category Summary */}
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div>
-                                <p className="text-sm text-gray-500">
-                                  Total Items
-                                </p>
-                                <p className="font-medium">
-                                  {safeNumber(details?.summary?.total_items)}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-gray-500">
-                                  Average Difference
-                                </p>
-                                <p className="font-medium">
-                                  {formatPercentage(
-                                    details?.summary?.average_cost_difference
-                                  )}
-                                  %
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-gray-500">
-                                  Total Difference
-                                </p>
-                                <p className="font-medium">
-                                  {formatCurrency(
-                                    details?.summary?.total_cost_difference
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Optional: Show occurrence information if available */}
-                            {details?.summary?.total_doc1_occurrences !==
-                              undefined && (
-                              <div className="grid grid-cols-2 gap-4 mt-4">
+                  ([category, details]) => {
+                    // Combine redundant items before rendering
+                    const combinedItems = combineRedundantItems(
+                      details?.items || []
+                    );
+                    return (
+                      <AccordionItem key={category} value={category}>
+                        <AccordionTrigger className="hover:no-underline">
+                          <div className="flex flex-1 justify-between items-center">
+                            <span className="font-medium">{category}</span>
+                            <span className="text-sm text-gray-500">
+                              Difference:{" "}
+                              {formatCurrency(
+                                details?.summary?.total_cost_difference
+                              )}
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-4">
+                            {/* Category Summary */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                   <p className="text-sm text-gray-500">
-                                    Occurrences
+                                    Total Items
                                   </p>
                                   <p className="font-medium">
-                                    Doc1:{" "}
-                                    {safeNumber(
-                                      details?.summary?.total_doc1_occurrences
-                                    )}
-                                    <br />
-                                    Doc2:{" "}
-                                    {safeNumber(
-                                      details?.summary?.total_doc2_occurrences
-                                    )}
+                                    {safeNumber(details?.summary?.total_items)}
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-sm text-gray-500">
-                                    Quantity Difference
+                                    Average Difference
                                   </p>
                                   <p className="font-medium">
                                     {formatPercentage(
-                                      details?.summary
-                                        ?.quantity_difference_percentage
+                                      details?.summary?.average_cost_difference
                                     )}
                                     %
                                   </p>
                                 </div>
+                                <div>
+                                  <p className="text-sm text-gray-500">
+                                    Total Difference
+                                  </p>
+                                  <p className="font-medium">
+                                    {formatCurrency(
+                                      details?.summary?.total_cost_difference
+                                    )}
+                                  </p>
+                                </div>
                               </div>
-                            )}
-                          </div>
 
-                          {/* Line Items */}
-                          <div className="space-y-2">
-                            {details?.items?.map(renderLineItem)}
+                              {/* Optional: Show occurrence information if available */}
+                              {details?.summary?.total_doc1_occurrences !==
+                                undefined && (
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                  <div>
+                                    <p className="text-sm text-gray-500">
+                                      Occurrences
+                                    </p>
+                                    <p className="font-medium">
+                                      Doc1:{" "}
+                                      {safeNumber(
+                                        details?.summary?.total_doc1_occurrences
+                                      )}
+                                      <br />
+                                      Doc2:{" "}
+                                      {safeNumber(
+                                        details?.summary?.total_doc2_occurrences
+                                      )}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-gray-500">
+                                      Quantity Difference
+                                    </p>
+                                    <p className="font-medium">
+                                      {formatPercentage(
+                                        details?.summary
+                                          ?.quantity_difference_percentage
+                                      )}
+                                      %
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Line Items */}
+                            <div className="space-y-2">
+                              {combinedItems.map(renderLineItem)}
+                            </div>
                           </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  )
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  }
                 )}
               </Accordion>
             </TabsContent>
@@ -1007,6 +1056,9 @@ const ComparisonApp = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+            <TabsContent value="appraiser">
+              <AppraiserView data={result} />
             </TabsContent>
           </Tabs>
         </div>
