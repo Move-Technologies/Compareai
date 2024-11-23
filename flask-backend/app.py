@@ -15,15 +15,73 @@ import re
 import pandas as pd
 from fuzzywuzzy import fuzz
 from datetime import datetime
+from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.formparser import RequestEntityTooLarge
+import logging
+from typing import List, Dict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import gc
+import traceback
+import pytesseract
+from pdf2image import convert_from_path
+import tempfile
+import os
+from PIL import Image
+from PyPDF2 import PdfReader
+import fitz  # PyMuPDF
+import logging.handlers
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps  # Add ImageOps import
+import shutil
+import time
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
+# Add at the top of your file, after imports
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%H:%M:%S'
+)
 logger = logging.getLogger(__name__)
+
+# Add a file handler if you want to save logs to a file
+file_handler = logging.FileHandler('pdf_processing.log')
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+logger.addHandler(file_handler)
 
 app = Flask(__name__)
 CORS(app)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Increase maximum content length to 1GB
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024  # 1GB
+app.config['MAX_CONTENT_PATH'] = None
+app.config['REQUEST_TIMEOUT'] = 1200  # 20 minutes for larger files
+
+# Add WSGI middleware to handle large files
+app.wsgi_app = ProxyFix(app.wsgi_app)
+
+# Configure maximum request size for werkzeug
+app.config['MAX_CONTENT_LENGTH'] = None  # Disable werkzeug's limit
+
+# Update error message for 1GB limit
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return jsonify({
+        'error': 'File too large. Maximum file size is 1GB.',
+        'code': 413,
+        'details': str(error)
+    }), 413
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_request_entity_too_large(error):
+    return jsonify({
+        'error': 'File too large for processing.',
+        'code': 413,
+        'details': str(error)
+    }), 413
+
 ALLOWED_EXTENSIONS = {'pdf'}
 
 client = openai.OpenAI(api_key="")
@@ -115,110 +173,468 @@ CATEGORY_PATTERNS = create_category_patterns()
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def process_pdf(pdf_file):
-    pdf = pdfplumber.open(pdf_file)
-    all_text = []
 
-    for page in pdf.pages:
-        chars = page.chars.copy()
 
-        for table in page.find_tables(table_settings={
-            "vertical_strategy": "text",
-            "horizontal_strategy": "lines",
-            "snap_tolerance": 3,
-            "join_tolerance": 3,
-            "edge_min_length": 3
-        }):
-            try:
-                df = pd.DataFrame(table.extract())
-                if len(df) > 0:
-                    if df.iloc[0].isna().any():
-                        df.columns = df.iloc[1]
-                        df = df.drop([0, 1])
-                    else:
-                        df.columns = df.iloc[0]
-                        df = df.drop(0)
-                    
-                    df = df.fillna('')
-                    markdown = df.to_markdown(index=False)
-                    
-                    chars.append({
-                        "text": "\n" + markdown + "\n",
-                        "x0": table.bbox[0],
-                        "top": table.bbox[1],
-                        "x1": table.bbox[2],
-                        "bottom": table.bbox[3],
-                        "doctop": table.bbox[1],
-                        "upright": True,
-                        "size": 12,
-                        "width": table.bbox[2] - table.bbox[0]
-                    })
+logger = logging.getLogger(__name__)
 
-            except Exception as e:
-                print(f"Error processing table: {e}")
+def preprocess_image(image):
+    """Enhanced image preprocessing for better OCR results"""
+    try:
+        # Convert to grayscale if not already
+        if image.mode != 'L':
+            gray = image.convert('L')
+        else:
+            gray = image
+        
+        # Increase contrast
+        enhancer = ImageEnhance.Contrast(gray)
+        gray = enhancer.enhance(2.0)
+        
+        # Add thresholding for cleaner text
+        gray = ImageOps.autocontrast(gray)
+        
+        # Enhance sharpness
+        enhancer = ImageEnhance.Sharpness(gray)
+        gray = enhancer.enhance(1.5)
+        
+        return gray
+        
+    except Exception as e:
+        logger.error(f"Error preprocessing image: {str(e)}")
+        return image
+
+def process_page_with_ocr(page, page_num: int) -> str:
+    """Process a single page with table-aware OCR"""
+    try:
+        # Try PyMuPDF first (usually faster and more accurate)
+        doc = fitz.open(page.pdf.stream.name)
+        try:
+            text = doc[page_num - 1].get_text()
+            if text and len(text.strip()) > 50:
+                lines = []
+                for line in text.split('\n'):
+                    if re.match(r'^\d+\.', line):
+                        line = f"{line} [Page: {page_num}]"
+                    lines.append(line)
+                return '\n'.join(lines)
+        finally:
+            doc.close()
+    except Exception as e:
+        logger.debug(f"PyMuPDF extraction failed for page {page_num}: {str(e)}")
+
+    try:
+        # Convert to image
+        images = convert_from_path(
+            page.pdf.stream.name,
+            first_page=page_num,
+            last_page=page_num,
+            dpi=300,
+            grayscale=True
+        )
+        
+        if not images:
+            return f"--- Page {page_num} ---\nNo images extracted\n"
+
+        img = preprocess_image(images[0])
+        
+        # Configure Tesseract
+        custom_config = r'--oem 3 --psm 6'
+        
+        # Get raw text
+        raw_text = pytesseract.image_to_string(
+            img,
+            lang='eng',
+            config=custom_config
+        )
+
+        # Process text line by line
+        lines = []
+        current_item = None
+        
+        for line in raw_text.split('\n'):
+            line = line.strip()
+            if not line:
                 continue
+                
+            if re.match(r'^\d+\.', line):
+                if current_item:
+                    lines.extend(format_table_item(current_item))
+                current_item = {'description': line, 'details': []}
+            elif current_item and re.match(r'^\d+\.?\d*\s*(?:EA|SF|LF|HR|MO|WK)', line):
+                current_item['details'].append(line)
+            elif current_item:
+                current_item['description'] += ' ' + line
+        
+        if current_item:
+            lines.extend(format_table_item(current_item))
+        
+        result = '\n'.join(lines)
+        
+        if result and len(result.strip()) > 50:
+            return f"--- Page {page_num} ---\n{result}\n"
+            
+        return f"--- Page {page_num} ---\nNo structured content extracted\n"
 
-        page_text = extract_text(chars, layout=True)
-        all_text.append(page_text)
+    except Exception as e:
+        logger.warning(f"OCR processing failed for page {page_num}: {str(e)}")
+        return f"--- Page {page_num} ---\nProcessing failed: {str(e)}\n"
 
-    pdf.close()
-    return "\n".join(all_text)
+def format_table_item(item):
+    """Format a table item with proper spacing"""
+    lines = []
+    
+    # Add description line
+    lines.append(item['description'])
+    
+    # Add details with proper column alignment
+    for detail in item['details']:
+        # Split the detail line into components
+        parts = re.split(r'\s+', detail)
+        
+        # Format with fixed column widths
+        formatted_line = ''
+        current_pos = 4  # Initial indent
+        
+        # Define column widths
+        columns = {
+            'quantity': 12,
+            'unit': 8,
+            'tax': 10,
+            'op': 10,
+            'rcv': 12,
+            'age_life': 10,
+            'cond': 8,
+            'dep': 8,
+            'deprec': 12,
+            'acv': 12
+        }
+        
+        # Add each part with proper spacing
+        for i, part in enumerate(parts):
+            if i < len(columns):
+                width = list(columns.values())[i]
+                formatted_line += part.ljust(width)
+            else:
+                formatted_line += ' ' + part
+        
+        lines.append(' ' * 4 + formatted_line.strip())
+    
+    return lines
+
+def process_pdf_with_ocr(file) -> str:
+    """Process PDF with PyMuPDF first, falling back to improved OCR if needed"""
+    start_time = time.time()
+    temp_file = None
+    extracted_text = ""
+    
+    try:
+        # Save to temporary file
+        logger.info("Creating temporary file...")
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp_pdf:
+            temp_file = tmp_pdf.name
+            if hasattr(file, 'save'):
+                file.save(temp_file)
+            else:
+                shutil.copyfileobj(file, tmp_pdf)
+
+        # Create output directory if it doesn't exist
+        output_dir = os.path.join(os.path.dirname(temp_file), 'ocr_output')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Generate unique filename based on timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        output_file = os.path.join(output_dir, f'ocr_output_{timestamp}.txt')
+
+        # Try PyMuPDF first
+        logger.info("Attempting PyMuPDF extraction...")
+        try:
+            doc = fitz.open(temp_file)
+            text = ""
+            total_pages = doc.page_count
+            has_text = False
+            
+            for page_num in range(total_pages):
+                logger.info(f"PyMuPDF: Processing page {page_num + 1}/{total_pages}")
+                page_text = doc[page_num].get_text()
+                if page_text.strip():
+                    has_text = True
+                    text += f"\n=== Page {page_num + 1} ===\n{page_text}"
+            doc.close()
+            
+            if has_text and len(text.strip()) > 100:
+                extracted_text = text
+                logger.info("PyMuPDF extraction successful")
+                # Save PyMuPDF output
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    f.write("=== PyMuPDF Extraction ===\n")
+                    f.write(extracted_text)
+                return extracted_text
+                
+        except Exception as e:
+            logger.warning(f"PyMuPDF extraction failed: {str(e)}")
+
+        # Only proceed to OCR if PyMuPDF failed
+        if not extracted_text:
+            logger.info("Starting improved OCR extraction...")
+            # Convert PDF to images
+            images = convert_from_path(temp_file, dpi=300)
+            all_text = []
+            
+            for i, image in enumerate(images, 1):
+                logger.info(f"Processing page {i} with OCR")
+                try:
+                    # Preprocess image
+                    processed_image = preprocess_image(image)
+                    
+                    # Perform OCR
+                    text = pytesseract.image_to_string(
+                        processed_image,
+                        lang='eng',
+                        config='--oem 3 --psm 6'
+                    )
+                    
+                    if text:  # Remove .strip() to preserve original formatting
+                        page_text = f"\n=== Page {i} ===\n{text}"
+                        all_text.append(page_text)
+                        
+                        # Save individual page output
+                        with open(output_file, 'a', encoding='utf-8') as f:
+                            f.write(page_text)
+                        
+                except Exception as e:
+                    logger.error(f"Error processing page {i}: {str(e)}")
+                    continue
+            
+            extracted_text = "\n".join(all_text) if all_text else ""
+
+        if not extracted_text:
+            logger.warning("No text could be extracted from the PDF")
+            # Save error message
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write("No text could be extracted from the PDF")
+            return ""
+        
+        logger.info(f"OCR output saved to: {output_file}")
+        return extracted_text
+
+    except Exception as e:
+        logger.error(f"Error in PDF processing: {str(e)}")
+        # Save error message
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(f"Error processing PDF: {str(e)}")
+        return ""
+
+    finally:
+        if temp_file and os.path.exists(temp_file):
+            try:
+                os.unlink(temp_file)
+                logger.info("Temporary file cleaned up")
+            except Exception as e:
+                logger.warning(f"Error cleaning up temporary file: {str(e)}")
+
+def preprocess_image(image):
+    """Enhanced image preprocessing for better OCR results"""
+    try:
+        # Convert to grayscale if not already
+        if image.mode != 'L':
+            gray = image.convert('L')
+        else:
+            gray = image
+        
+        # Increase contrast
+        enhancer = ImageEnhance.Contrast(gray)
+        gray = enhancer.enhance(2.0)
+        
+        # Add thresholding for cleaner text
+        gray = ImageOps.autocontrast(gray)
+        
+        # Enhance sharpness
+        enhancer = ImageEnhance.Sharpness(gray)
+        gray = enhancer.enhance(1.5)
+        
+        return gray
+        
+    except Exception as e:
+        logger.error(f"Error preprocessing image: {str(e)}")
+        return image
+
+def process_page_alternative(file_path: str, page_num: int) -> str:
+    """Alternative method to process a single page using PyMuPDF directly"""
+    try:
+        doc = fitz.open(file_path)
+        try:
+            page = doc[page_num - 1]
+            
+            # Try to get text directly first
+            text = page.get_text()
+            if text and not text.isspace():
+                return f"--- Page {page_num} ---\n{text}\n"
+            
+            # If no text, try OCR
+            zoom = 2.0
+            mat = fitz.Matrix(zoom, zoom)
+            pix = page.get_pixmap(matrix=mat, alpha=False)
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            img = preprocess_image(img)
+            
+            ocr_text = pytesseract.image_to_string(
+                img,
+                lang='eng',
+                config='--psm 6 --oem 3'
+            )
+            
+            return f"--- Page {page_num} (Alternative OCR) ---\n{ocr_text}\n"
+            
+        finally:
+            doc.close()
+            
+    except Exception as e:
+        logger.error(f"Alternative processing failed for page {page_num}: {str(e)}")
+        return f"--- Page {page_num} ---\nFailed to extract text\n"
+
+def process_pdf_alternative(file_path: str) -> list:
+    """Process entire PDF using PyMuPDF as an alternative method"""
+    all_text = []
+    
+    try:
+        doc = fitz.open(file_path)
+        try:
+            for page_num in range(doc.page_count):
+                text = process_page_alternative(file_path, page_num + 1)
+                all_text.append(text)
+                gc.collect()
+                
+        finally:
+            doc.close()
+            
+    except Exception as e:
+        logger.error(f"Alternative PDF processing failed: {str(e)}")
+        all_text.append(f"Failed to process PDF: {str(e)}")
+        
+    return all_text
+
+# Create a custom handler to capture warnings
+class WarningCaptureHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.warnings = []
+
+    def emit(self, record):
+        self.warnings.append(record.getMessage())
+
+def is_valid_pdf(file_path) -> tuple[bool, str]:
+    """
+    Validate if the file is a valid, readable PDF and check for restrictions.
+    Returns (is_valid, error_message)
+    """
+    # Set up warning capture
+    warning_handler = WarningCaptureHandler()
+    logging.getLogger('pdfminer').addHandler(warning_handler)
+    
+    try:
+        # First try with PyPDF2
+        with open(file_path, 'rb') as file:
+            try:
+                pdf = PdfReader(file)
+                
+                # Skip encryption check to allow OCR processing
+                # if pdf.is_encrypted:
+                #     return False, "PDF is encrypted or password protected"
+                    
+                # Check for empty document
+                if len(pdf.pages) == 0:
+                    return False, "PDF contains no pages"
+                    
+                # Check for warnings that indicate corruption
+                if any('Data-loss' in warning or 'corrupted' in warning.lower() 
+                      for warning in warning_handler.warnings):
+                    return False, "PDF appears to be corrupted or contains data loss"
+                    
+            except Exception as e:
+                logger.warning(f"PyPDF2 validation failed: {str(e)}")
+                # If PyPDF2 fails, try with PyMuPDF as fallback
+                try:
+                    doc = fitz.open(file_path)
+                    if doc.needs_pass:
+                        doc.close()
+                        return False, "PDF is encrypted or password protected"
+                    if doc.page_count == 0:
+                        doc.close()
+                        return False, "PDF contains no pages"
+                        
+                    # Additional corruption check with PyMuPDF
+                    try:
+                        # Try to access each page - this can trigger corruption errors
+                        for page_num in range(doc.page_count):
+                            page = doc[page_num]
+                            # Try to get text to check for corruption
+                            text = page.get_text()
+                    except Exception as page_error:
+                        doc.close()
+                        return False, f"PDF corruption detected: {str(page_error)}"
+                        
+                    doc.close()
+                except Exception as mupdf_error:
+                    return False, f"Invalid or corrupted PDF: {str(mupdf_error)}"
+
+        # Check captured warnings for any corruption indicators
+        if warning_handler.warnings:
+            corruption_warnings = [w for w in warning_handler.warnings 
+                                if 'Data-loss' in w or 'corrupted' in w.lower()]
+            if corruption_warnings:
+                return False, f"PDF corruption detected: {'; '.join(corruption_warnings)}"
+
+        return True, ""
+
+    except Exception as e:
+        return False, f"Error validating PDF: {str(e)}"
+        
+    finally:
+        # Clean up the warning handler
+        logging.getLogger('pdfminer').removeHandler(warning_handler)
+
+def extract_text_from_pdf(text, doc_id):
+    """Parse line items from text"""
+    try:
+        # Output raw text to a file
+        output_filename = f"{doc_id}_extracted_text.txt"
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            f.write(text if text else "No text extracted")
+        
+        # Continue with parsing if we have text
+        if text:
+            try:
+                items = parse_line_items(text)
+                logger.info(f"Processed {len(items)} items from {doc_id}")
+                return items
+            except Exception as e:
+                logger.error(f"Error parsing line items for {doc_id}: {str(e)}")
+                return []
+        return []
+        
+    except Exception as e:
+        logger.error(f"Error processing text {doc_id}: {str(e)}")
+        return []
 
 def clean_item_number(item_number):
-    """
-    Extracts only the numerical part from an item number and adds a period.
-    Examples: 
-    'DD2WW59.' -> '259.'
-    'CClloosseett ((11))286.' -> '286.'
-    'BBeeddrroooomm 22 MM CClloosseett 516.' -> '516.'
-    'Room 2 516.' -> '516.'  # Now handles room numbers correctly
-    Rejects: 'LLaauunnddrryy RRoo 1oomm1 1. .4 43'
-    """
-    # Split at the period to get just the item number part
-    item_parts = item_number.split('.')
-    if not item_parts:
-        return None
-    
-    item_number_part = item_parts[0]
-    
-    # Check if there are numbers with spaces at the end of the string
-    if re.search(r'\d\s+\d+\s*$', item_number_part):
+    """Clean and standardize item numbers"""
+    if not item_number:
         return None
         
-    # First remove any parentheses and their contents
-    no_parentheses = re.sub(r'\([^)]*\)', '', item_number_part)
-    # Remove any scattered spaces
-    no_spaces = re.sub(r'\s+', '', no_parentheses)
-    
-    # Find all groups of consecutive digits
-    digit_groups = re.findall(r'\d+', no_spaces)
-    
-    if not digit_groups:
-        return None
-        
-    # Take the last group of digits (usually the line number)
-    digits = digit_groups[-1]
-    
-    # Validation checks
-    if len(digits) > 4:  # Assuming line numbers won't be more than 4 digits
-        return None
-        
-    # Add period to the cleaned number
-    return f"{digits}."
+    # Extract only the numeric part
+    match = re.search(r'(\d+)', str(item_number))
+    if match:
+        return match.group(1)
+    return None
 
 def parse_quantity(quantity_text):
-    """
-    Parse quantity value from text that may include unit.
-    Examples:
-    '1.00EA' -> 1.0
-    '10.5SF' -> 10.5
-    '100LF' -> 100.0
-    """
-    if quantity_text is None:
+    """Parse quantity value from text that may include unit"""
+    if not quantity_text:
         return 0.0
         
     try:
-        # Remove any units (EA, SF, LF, etc) and convert to float
+        # Remove any units (SF, EA, LF, etc) and convert to float
         quantity_str = re.match(r'^([\d,\.]+)', str(quantity_text).strip())
         if quantity_str:
             return float(quantity_str.group(1).replace(',', ''))
@@ -232,123 +648,42 @@ def cleanup_line_item(item):
     Post-process a line item to ensure properties are correctly populated and track occurrences
     """
     try:
-        # Combine notes into a single string for easier processing
-        notes_text = ' '.join(str(note) for note in item.get('notes', []))
-        
-        # Initialize default values for required fields
+        # Initialize default values
         item.setdefault('quantity', '0')
         item.setdefault('rcv', '0')
         item.setdefault('item_number', '0')
         item.setdefault('page_number', 1)
         item.setdefault('description', '')
-        item.setdefault('notes', [])
         
-        # Updated pattern to match the actual format in notes
-        quantity_pattern = r'''
-            (\d+\.?\d*(?:SF|EA|LF)?)\s+           # Quantity with optional unit
-            ([-\d,\.]+)\s+                         # Unit cost
-            ([-\d,\.]+)\s+                         # Tax
-            ([-\d,\.]+)\s+                         # O&P
-            ([-\d,\.]+)                           # RCV
-            (?:\s+(\d+/\d+|\d+/[A-Z]+|0/NA)\s+)?  # Optional AGE/LIFE
-            (?:yr\s+)?                            # Optional "yr"
-            (?:Avg\.\s+)?                         # Optional "Avg."
-            (?:(\d+)%)?                           # Optional Depreciation percentage
-        '''
-        
-        # Check notes first, then description
-        for text in [notes_text, item['description']]:
-            quantity_match = re.search(quantity_pattern, text, re.VERBOSE)
-            if quantity_match and not item.get('quantity'):  # Only update if properties are empty
-                quantity = quantity_match.group(1)
-                
-                # Extract unit type from quantity
-                unit_type = re.search(r'(SF|EA|LF)$', quantity)
-                unit = unit_type.group(1) if unit_type else 'EA'
-                # Remove unit from quantity if present
-                quantity = re.sub(r'(SF|EA|LF)$', '', quantity)
-                
-                item.update({
-                    'quantity': quantity.strip() or '0',
-                    'unit': unit,
-                    'unit_cost': quantity_match.group(2).replace(',', '') or '0',
-                    'tax': quantity_match.group(3).replace(',', '') or '0',
-                    'o&p': quantity_match.group(4).replace(',', '') or '0',
-                    'rcv': quantity_match.group(5).replace(',', '') or '0',
-                    'age_life': quantity_match.group(6) if quantity_match.group(6) else 'N/A',
-                    'dep_percent': quantity_match.group(7) if quantity_match.group(7) else '0'
-                })
-                
-                # Calculate depreciation and ACV if we have RCV and dep_percent
-                try:
-                    rcv = float(item['rcv'])
-                    dep_percent = float(item['dep_percent'])
-                    depreciation = rcv * (dep_percent / 100)
-                    acv = rcv - depreciation
-                    
-                    item.update({
-                        'depreciation': f"{depreciation:.2f}",
-                        'acv': f"{acv:.2f}"
-                    })
-                except (ValueError, TypeError):
-                    item.update({
-                        'depreciation': '0.00',
-                        'acv': '0.00'
-                    })
-        
-        # Add occurrence tracking
-        if not item.get('occurrences'):
-            item['occurrences'] = []
-        
-        # Add current occurrence with proper quantity parsing and error handling
-        try:
-            occurrence = {
-                'line_number': str(item.get('item_number', '0')),
-                'quantity': parse_quantity(item.get('quantity', '0')),
-                'rcv': float(str(item.get('rcv', '0')).replace(',', '') or '0'),
-                'page_number': int(item.get('page_number', 1))
-            }
-        except (ValueError, TypeError):
-            occurrence = {
-                'line_number': '0',
-                'quantity': 0.0,
-                'rcv': 0.0,
-                'page_number': 1
-            }
-        
-        item['occurrences'].append(occurrence)
-        
-        # Calculate totals for all occurrences
-        try:
-            total_quantity = sum(occ['quantity'] for occ in item['occurrences'])
-            total_rcv = sum(occ['rcv'] for occ in item['occurrences'])
-        except (ValueError, TypeError):
-            total_quantity = 0.0
-            total_rcv = 0.0
-        
-        # Add occurrence summary
-        item['occurrence_summary'] = {
-            'total_quantity': total_quantity,
-            'total_rcv': total_rcv,
-            'occurrences_detail': [
-                f"Line {occ['line_number']} (Page {occ['page_number']}): "
-                f"Qty={occ['quantity']}, RCV=${float(occ['rcv']):.2f}"
-                for occ in item['occurrences']
-            ]
+        # Format occurrences data
+        doc1_occurrences = {
+            'total_quantity': float(item.get('quantity', 0)),
+            'total_rcv': float(item.get('rcv', 0)),
+            'occurrences_detail': []
         }
+        
+        # Add occurrence detail with proper formatting
+        if item.get('occurrence'):
+            occurrence_detail = (
+                f"Line {item['occurrence'].get('line', '0')} "
+                f"(Page {item['occurrence'].get('page', '1')}): "
+                f"Qty={float(item.get('quantity', 0))}, "
+                f"RCV=${float(item.get('rcv', 0)):.2f}"
+            )
+            doc1_occurrences['occurrences_detail'].append(occurrence_detail)
+        
+        item['doc1_occurrences'] = doc1_occurrences
         
         return item
         
     except Exception as e:
         logger.error(f"Error in cleanup_line_item: {str(e)}")
-        # Return a safe default item
         return {
             'description': item.get('description', ''),
             'quantity': '0',
             'unit': 'EA',
             'rcv': '0',
-            'occurrences': [],
-            'occurrence_summary': {
+            'doc1_occurrences': {
                 'total_quantity': 0.0,
                 'total_rcv': 0.0,
                 'occurrences_detail': []
@@ -356,126 +691,110 @@ def cleanup_line_item(item):
         }
 
 def parse_line_items(text):
-    """Parse line items with page number tracking"""
+    """Parse line items with enhanced page number and line occurrence tracking"""
     line_items = []
-    
-    # Updated pattern to be more strict about line endings
-    line_pattern = r'^\s*(?!.*(?:\.\s+\.\s+\d|\d\s+\.\s+\d))([A-Za-z0-9()\s]*?\d+[A-Za-z]*)\.\s+(.*?)(?:\s*\*)?$'
-    
-    # Updated quantity pattern to be more strict about number formats
-    quantity_pattern = r'''^\s*
-        (?!.*\b\d+\s+\d+\s+\d+\b)              # Negative lookahead to prevent matching scattered numbers
-        (\d+\.?\d*(?:\s*[A-Z]{1,3})?)\s+      # Quantity with optional unit (allowing space)
-        ([-\d,\.]+)\s+                         # Unit cost
-        ([-\d,\.]+)\s+                         # Tax
-        ([-\d,\.]+)\s+                         # O&P
-        ([-\d,\.]+)\s+                         # RCV
-        (?:(\d+/(?:NA|[A-Z]+))\s+)?           # Optional AGE/LIFE (now handles "NA")
-        (?:Avg\.\s+)?                          # Optional "Avg."
-        (\d+)%\s+                              # Depreciation percentage
-        (?:\[[A-Z]\]\s+)?                      # Optional [M] or other bracketed letter
-        \(([^)]+)\)\s+                         # Depreciation amount in parentheses
-        ([-\d,\.]+)                           # ACV
-    '''
-    
-    headers = {'QUANTITY', 'UNIT', 'TAX', 'O&P', 'RCV', 'AGE/LIFE', 'COND.', 'DEP %', 'DEPREC.', 'ACV'}
+    current_page = 1
+    current_item = None
     
     lines = text.split('\n')
-    i = 0
-    current_item = None
-    current_page = 1
     
-    while i < len(lines):
-        line = lines[i].strip()
-        
-        # Check for page markers
-        page_match = re.search(r'Page:\s*(\d+)', line)
-        if page_match:
-            current_page = int(page_match.group(1))
-            i += 1
-            continue
-            
-        # Skip empty lines and headers
-        if not line or any(header in line for header in headers):
-            i += 1
-            continue
-            
-        # Check for page markers or totals
-        if 'Page:' in line or line.startswith('Totals:'):
-            i += 1
-            continue
-        
-        # Try to match a new line item
-        match = re.match(line_pattern, line)
-        if match:
-            raw_item_number = match.group(1)
-            cleaned_item_number = clean_item_number(raw_item_number)
-            
-            # Skip this item if cleaning returned None
-            if cleaned_item_number is None:
-                i += 1
+    for i, line in enumerate(lines):
+        try:
+            # Check for page markers in header format "Page: X" or "Page X"
+            page_match = re.search(r'Page:?\s*(\d+)', line, re.IGNORECASE)
+            if page_match:
+                current_page = int(page_match.group(1))
                 continue
+            
+            # Try OCR-specific pattern first - now looking for description with embedded numbers
+            ocr_match = re.match(r"""
+                ^(.*?)\s+                           # Description (non-greedy, includes item number)
+                (\d+\.?\d*)\s*([A-Z]{2})\s+        # Quantity with unit
+                (\d+\.?\d*)\s+                      # First number
+                (\d+\.?\d*)\s+                      # Second number
+                (\d+\.?\d*)\s+                      # Third number
+                (\d+\.?\d*)\s+                      # Fourth number
+                (\d+\.?\d*)$                        # Final number (RCV)
+            """, line.strip(), re.VERBOSE)
+            
+            if ocr_match:
+                # Extract item number and description
+                full_desc = ocr_match.group(1).strip()
+                item_num_match = re.match(r'^(\d{1,3}(?:,\d{3})*)\.\s+(.*?)$', full_desc)
                 
-            # If we have a current item, append it before starting new one
+                if item_num_match:
+                    item_number = int(item_num_match.group(1).replace(',', ''))
+                    description = item_num_match.group(2).strip()
+                    quantity = ocr_match.group(2)
+                    unit = ocr_match.group(3)
+                    rcv = ocr_match.group(8)  # Last number as RCV
+                    
+                    current_item = {
+                        'item_number': item_number,
+                        'description': description,
+                        'page_number': current_page,
+                        'line_number': item_number,
+                        'occurrence': {
+                            'page': current_page,
+                            'line': item_number
+                        },
+                        'quantity': quantity,
+                        'unit': unit,
+                        'rcv': rcv
+                    }
+                    
+                    logger.debug(f"Matched OCR line item {item_number}: {description[:50]}...")
+                    line_items.append(current_item)
+                    current_item = None  # Reset current_item after adding
+                    continue
+            
+            # Rest of the existing code for normal text parsing...
+            # If not OCR format, try original pattern
+            line_match = re.match(r'^(\d{1,3}(?:,\d{3})*)\.\s+(.*?)$', line.strip())
+            if line_match:
+                # Save previous item if exists
+                if current_item:
+                    line_items.append(cleanup_line_item(current_item))
+                
+                # Convert item number string to integer (remove commas first)
+                item_number = int(line_match.group(1).replace(',', ''))
+                current_item = {
+                    'item_number': item_number,
+                    'description': line_match.group(2),
+                    'page_number': current_page,
+                    'line_number': item_number,
+                    'occurrence': {
+                        'page': current_page,
+                        'line': item_number
+                    },
+                    'quantity': '0',
+                    'unit': 'EA',
+                    'rcv': '0'
+                }
+                continue
+            
+            # If we have a current item (non-OCR), try to match quantity and values
             if current_item:
-                line_items.append(current_item)
+                # Match quantity and unit
+                qty_unit_match = re.match(r'^([\d,\.]+)\s*([A-Z]{2})\s*$', line.strip())
+                if qty_unit_match:
+                    current_item['quantity'] = qty_unit_match.group(1).replace(',', '')
+                    current_item['unit'] = qty_unit_match.group(2)
+                    continue
                 
-            description = match.group(2).strip()
-            current_item = {
-                'item_number': cleaned_item_number,
-                'raw_item_number': raw_item_number, 
-                'description': description,
-                'quantity': None,
-                'unit_cost': None,
-                'tax': None,
-                'o&p': None,
-                'rcv': None,
-                'age_life': None,
-                'dep_percent': None,
-                'depreciation': None,
-                'acv': None,
-                'notes': [],
-                'page_number': current_page
-            }
-            i += 1
-            continue
-            
-        # Try to match quantity line
-        quantity_match = re.match(quantity_pattern, line, re.VERBOSE)
-        if current_item and quantity_match:
-            current_item.update({
-                'quantity': quantity_match.group(1),
-                'unit_cost': quantity_match.group(2).replace(',', ''),
-                'tax': quantity_match.group(3).replace(',', ''),
-                'o&p': quantity_match.group(4).replace(',', ''),
-                'rcv': quantity_match.group(5).replace(',', ''),
-                'age_life': quantity_match.group(6) if quantity_match.group(6) else 'N/A',
-                'dep_percent': quantity_match.group(7),
-                'depreciation': quantity_match.group(8).replace(',', ''),
-                'acv': quantity_match.group(9).replace(',', '')
-            })
-            
-            # Extract unit type from quantity if present
-            unit_type = re.search(r'[A-Z]{2,}$', quantity_match.group(1))
-            current_item['unit'] = unit_type.group(0) if unit_type else 'EA'
-            
-            i += 1
-            continue
-            
-        # If line doesn't match quantity pattern and we have a current item,
-        # treat it as a note
-        if current_item and line:
-            current_item['notes'].append(line)
+                # Match RCV value
+                rcv_match = re.match(r'^([\d,\.]+)$', line.strip())
+                if rcv_match:
+                    current_item['rcv'] = rcv_match.group(1).replace(',', '')
+                    continue
         
-        i += 1
+        except Exception as e:
+            logger.error(f"Error processing line {i}: {str(e)}")
+            continue
     
-    # Don't forget to append the last item
+    # Don't forget to append the last item if it's a non-OCR item
     if current_item:
-        current_item = cleanup_line_item(current_item)
-        line_items.append(current_item)
-    
-    # Clean up all items one final time
-    line_items = [cleanup_line_item(item) for item in line_items]
+        line_items.append(cleanup_line_item(current_item))
     
     return line_items
 
@@ -645,114 +964,142 @@ def extract_numeric_value(value_str):
         return 0.0
 
 def compare_line_items(items1, items2):
-    """Compare line items with occurrence tracking"""
-    comparison_results = {
-        'all_items_comparison': [],
-        'cost_discrepancies': [],
-        'quantity_discrepancies': [],
-        'unique_to_doc1': [],
-        'unique_to_doc2': []
-    }
-    
-    # Track matched items from doc2 to avoid duplicates
-    matched_items_doc2 = set()
-    
-    # Compare items
-    for item1 in items1:
-        matched_item, match_ratio = find_best_match(
-            item1['description'], 
-            [item for item in items2 if item['description'] not in matched_items_doc2]
-        )
+    """Compare line items with proper occurrence tracking"""
+    try:
+        logger.info(f"Comparing {len(items1)} items from doc1 with {len(items2)} items from doc2")
         
-        try:
-            # Extract numeric values and units
-            item1_quantity = extract_numeric_value(item1.get('quantity', 0))
-            item1_unit = extract_unit(item1.get('quantity', 'EA'))
-            item1_cost = float(item1.get('rcv', 0))
+        comparison_results = {
+            'all_items_comparison': [],
+            'cost_discrepancies': [],
+            'quantity_discrepancies': [],
+            'unique_to_doc1': [],
+            'unique_to_doc2': []
+        }
+        
+        # Compare items
+        for item1 in items1:
+            try:
+                item1_desc = item1.get('description', '')
+                item1_qty = float(item1.get('quantity', '0').replace(',', '') or '0')
+                item1_rcv = float(item1.get('rcv', '0').replace(',', '') or '0')
+                
+                # Create doc1 occurrence data
+                doc1_occurrences = [{
+                    'page': item1.get('page_number', 1),
+                    'line': item1.get('line_number', 0),
+                    'quantity': item1_qty,
+                    'rcv': item1_rcv,
+                    'quantity_line': item1.get('occurrence', {}).get('quantity_line'),
+                    'quantity_page': item1.get('occurrence', {}).get('quantity_page'),
+                    'rcv_line': item1.get('occurrence', {}).get('rcv_line'),
+                    'rcv_page': item1.get('occurrence', {}).get('rcv_page')
+                }]
+                
+                matched_item, match_ratio = find_best_match(item1_desc, items2)
+                
+                if matched_item:
+                    matched_qty = float(matched_item.get('quantity', '0').replace(',', '') or '0')
+                    matched_rcv = float(matched_item.get('rcv', '0').replace(',', '') or '0')
+                    
+                    # Create doc2 occurrence data
+                    doc2_occurrences = [{
+                        'page': matched_item.get('page_number', 1),
+                        'line': matched_item.get('line_number', 0),
+                        'quantity': matched_qty,
+                        'rcv': matched_rcv,
+                        'quantity_line': matched_item.get('occurrence', {}).get('quantity_line'),
+                        'quantity_page': matched_item.get('occurrence', {}).get('quantity_page'),
+                        'rcv_line': matched_item.get('occurrence', {}).get('rcv_line'),
+                        'rcv_page': matched_item.get('occurrence', {}).get('rcv_page')
+                    }]
+                    
+                    comparison_entry = {
+                        'description': item1_desc,
+                        'doc1_quantity': item1_qty,
+                        'doc1_cost': item1_rcv,
+                        'doc1_occurrences': doc1_occurrences,
+                        'unit': item1.get('unit', 'EA'),
+                        'doc2_quantity': matched_qty,
+                        'doc2_cost': matched_rcv,
+                        'doc2_occurrences': doc2_occurrences,
+                        'quantity_difference': item1_qty - matched_qty,
+                        'cost_difference': item1_rcv - matched_rcv,
+                        'percentage_cost_difference': ((item1_rcv - matched_rcv) / item1_rcv * 100) if item1_rcv != 0 else 0,
+                        'match_confidence': match_ratio,
+                        'occurrence_summary': {
+                            'doc1': {
+                                'total_quantity': item1_qty,
+                                'total_rcv': item1_rcv,
+                                'occurrences_detail': doc1_occurrences
+                            },
+                            'doc2': {
+                                'total_quantity': matched_qty,
+                                'total_rcv': matched_rcv,
+                                'occurrences_detail': doc2_occurrences
+                            }
+                        }
+                    }
+                    
+                    comparison_results['all_items_comparison'].append(comparison_entry)
+                    
+                    if abs(comparison_entry['cost_difference']) > 0.01:
+                        comparison_results['cost_discrepancies'].append(comparison_entry)
+                    if abs(comparison_entry['quantity_difference']) > 0.01:
+                        comparison_results['quantity_discrepancies'].append(comparison_entry)
+                else:
+                    comparison_results['unique_to_doc1'].append({
+                        **item1,
+                        'occurrences': doc1_occurrences,
+                        'occurrence_summary': {
+                            'total_quantity': item1_qty,
+                            'total_rcv': item1_rcv,
+                            'occurrences_detail': doc1_occurrences
+                        }
+                    })
             
-            if matched_item:
-                # Add to tracked items to prevent future matches
-                matched_items_doc2.add(matched_item['description'])
+            except Exception as e:
+                logger.error(f"Error comparing item: {str(e)}")
+                continue
+        
+        # Find items unique to doc2
+        doc1_descriptions = {item.get('description', '').lower() for item in items1}
+        for item2 in items2:
+            if item2.get('description', '').lower() not in doc1_descriptions:
+                qty = float(item2.get('quantity', '0').replace(',', '') or '0')
+                rcv = float(item2.get('rcv', '0').replace(',', '') or '0')
                 
-                matched_quantity = extract_numeric_value(matched_item.get('quantity', 0))
-                matched_unit = extract_unit(matched_item.get('quantity', 'EA'))
-                matched_cost = float(matched_item.get('rcv', 0))
+                doc2_occurrences = [{
+                    'page': item2.get('page_number', 1),
+                    'line': item2.get('line_number', 0),
+                    'quantity': qty,
+                    'rcv': rcv,
+                    'quantity_line': item2.get('occurrence', {}).get('quantity_line'),
+                    'quantity_page': item2.get('occurrence', {}).get('quantity_page'),
+                    'rcv_line': item2.get('occurrence', {}).get('rcv_line'),
+                    'rcv_page': item2.get('occurrence', {}).get('rcv_page')
+                }]
                 
-                quantity_diff = item1_quantity - matched_quantity if item1_unit == matched_unit else None
-                cost_diff = item1_cost - matched_cost
-                percentage_diff = (cost_diff / item1_cost * 100) if item1_cost != 0 else 0
-                
-                # Ensure we're getting the correct occurrence data
-                doc2_occurrences = matched_item.get('occurrence_summary', {
-                    'total_quantity': 0,
-                    'total_rcv': 0,
-                    'occurrences_detail': []
+                comparison_results['unique_to_doc2'].append({
+                    **item2,
+                    'occurrences': doc2_occurrences,
+                    'occurrence_summary': {
+                        'total_quantity': qty,
+                        'total_rcv': rcv,
+                        'occurrences_detail': doc2_occurrences
+                    }
                 })
-            else:
-                matched_quantity = None
-                matched_unit = None
-                matched_cost = None
-                quantity_diff = None
-                cost_diff = None
-                percentage_diff = None
-                doc2_occurrences = None
-            
-            comparison_entry = {
-                'description': item1['description'],
-                'doc1_quantity': item1_quantity,
-                'doc2_quantity': matched_quantity,
-                'unit': item1_unit,
-                'doc1_cost': item1_cost,
-                'doc2_cost': matched_cost,
-                'doc1_occurrences': item1.get('occurrence_summary', {
-                    'total_quantity': 0,
-                    'total_rcv': 0,
-                    'occurrences_detail': []
-                }),
-                'doc2_occurrences': doc2_occurrences,
-                'quantity_difference': quantity_diff,
-                'cost_difference': cost_diff,
-                'percentage_cost_difference': percentage_diff,
-                'match_confidence': match_ratio
-            }
-            
-            comparison_results['all_items_comparison'].append(comparison_entry)
-            
-            if matched_item and cost_diff is not None:
-                if abs(cost_diff) > 0.01:
-                    comparison_results['cost_discrepancies'].append({
-                        'description': item1['description'],
-                        'doc1_cost': item1_cost,
-                        'doc2_cost': matched_cost,
-                        'difference': cost_diff,
-                        'match_confidence': match_ratio
-                    })
-                
-                if quantity_diff is not None and abs(quantity_diff) > 0.01:
-                    comparison_results['quantity_discrepancies'].append({
-                        'description': item1['description'],
-                        'doc1_quantity': item1_quantity,
-                        'doc2_quantity': matched_quantity,
-                        'unit': item1_unit,
-                        'difference': quantity_diff,
-                        'match_confidence': match_ratio
-                    })
-            else:
-                comparison_results['unique_to_doc1'].append(item1)
-                
-        except Exception as e:
-            logger.error(f"Error processing item: {str(e)}")
-            logger.error(f"Item details: {item1}")
-            continue
-    
-    # Find items unique to doc2
-    matched_descriptions = {item['description'] for item in comparison_results['all_items_comparison']}
-    comparison_results['unique_to_doc2'] = [
-        item for item in items2 
-        if item['description'] not in matched_descriptions
-    ]
-    
-    return comparison_results
+        
+        return comparison_results
+        
+    except Exception as e:
+        logger.error(f"Error in compare_line_items: {str(e)}")
+        return {
+            'all_items_comparison': [],
+            'cost_discrepancies': [],
+            'quantity_discrepancies': [],
+            'unique_to_doc1': [],
+            'unique_to_doc2': []
+        }
 
 def create_category_summary(items):
     """Create summary statistics for a category of items"""
@@ -781,68 +1128,171 @@ def create_category_summary(items):
         'items_with_discrepancies': int(items_with_discrepancies)
     }
 
-def prepare_categorized_items(analysis_df, comparison_results):
-    """Prepare items categorized by type with summaries"""
-    categorized_items = {}
-    
-    for category, group in analysis_df.groupby('category'):
-        items = []
-        for _, row in group.iterrows():
-            item_data = {
-                'description': clean_description(row['description']),  # Clean the description here
-                'doc1_quantity': float(row['doc1_quantity']) if pd.notnull(row['doc1_quantity']) else None,
-                'doc2_quantity': float(row['doc2_quantity']) if pd.notnull(row['doc2_quantity']) else None,
-                'doc1_cost': float(row['doc1_cost']) if pd.notnull(row['doc1_cost']) else None,
-                'doc2_cost': float(row['doc2_cost']) if pd.notnull(row['doc2_cost']) else None,
-                'unit': row['unit'],
-                'cost_difference': float(row['cost_difference']) if pd.notnull(row['cost_difference']) else None,
-                'percentage_difference': float(row['percentage_cost_difference']) if pd.notnull(row['percentage_cost_difference']) else None,
-                'is_labor': bool(row['is_labor']),
-                'is_temporary': bool(row['is_temporary']),
-                'doc1_occurrences': row.get('doc1_occurrences'),
-                'doc2_occurrences': row.get('doc2_occurrences'),
-                'match_confidence': float(row.get('match_confidence', 0)),
+def format_occurrence_data(item, doc_number):
+    """Format occurrence data for a single document"""
+    try:
+        quantity = float(item.get('quantity', 0))
+        rcv = float(item.get('rcv', 0))
+        page = item.get('page_number', 1)
+        line = item.get('item_number', 0)  # Use item_number instead of line_number
+        
+        return {
+            f'doc{doc_number}_occurrences': {
+                'total_quantity': quantity,
+                'total_rcv': rcv,
+                'occurrences_detail': [
+                    f"Line {line} (Page {page}): Qty={quantity}, RCV=${rcv:.2f}"
+                ]
             }
+        }
+    except Exception as e:
+        logger.error(f"Error formatting occurrence data: {str(e)}")
+        return {
+            f'doc{doc_number}_occurrences': {
+                'total_quantity': 0.0,
+                'total_rcv': 0.0,
+                'occurrences_detail': []
+            }
+        }
+
+def prepare_categorized_items(df: pd.DataFrame, comparison_results: dict) -> Dict:
+    """Prepare all items organized by category with detailed analysis"""
+    try:
+        # Define threshold for significant differences
+        HIGH_DIFFERENCE_THRESHOLD = 20
+        CRITICAL_DIFFERENCE_THRESHOLD = 50
+
+        categorized_items = {}
+
+        # Create a mapping of descriptions to their occurrences from all_items_comparison
+        occurrence_mapping = {}
+        
+        # Process all_items_comparison for both doc1 and doc2 occurrences
+        for item in comparison_results['all_items_comparison']:
+            desc = item.get('description', '')
             
-            # Add additional fields from all_items_data if it exists
-            all_items_data = next(
-                (item for item in comparison_results['all_items_comparison'] 
-                 if clean_description(item['description']) == clean_description(row['description'])),  # Clean descriptions for comparison
-                None
-            )
-            
-            if all_items_data:
-                additional_data = {
-                    'quantity': float(all_items_data.get('quantity')) if all_items_data.get('quantity') is not None else None,
-                    'unit_cost': float(all_items_data.get('unit_cost')) if all_items_data.get('unit_cost') is not None else None,
-                    'tax': float(all_items_data.get('tax')) if all_items_data.get('tax') is not None else None,
-                    'op': float(all_items_data.get('op')) if all_items_data.get('op') is not None else None,
-                    'rcv': float(all_items_data.get('rcv')) if all_items_data.get('rcv') is not None else None,
-                    'total_cost': float(all_items_data.get('total_cost')) if all_items_data.get('total_cost') is not None else None,
-                    'occurrences': all_items_data.get('occurrences', []),
-                    'occurrence_count': int(all_items_data.get('occurrence_count', 0)),
-                    'occurrence_summary': all_items_data.get('occurrence_summary', {
+            # Initialize occurrence data if not exists
+            if desc not in occurrence_mapping:
+                occurrence_mapping[desc] = {
+                    'doc1_occurrences': {
                         'total_quantity': 0,
                         'total_rcv': 0,
-                        'occurrences_detail': []
-                    })
+                        'occurrences_detail': set()  # Using set to prevent duplicates
+                    },
+                    'doc2_occurrences': {
+                        'total_quantity': 0,
+                        'total_rcv': 0,
+                        'occurrences_detail': set()  # Using set to prevent duplicates
+                    }
                 }
-                item_data.update(additional_data)
+
+            # Process doc1 occurrences
+            if 'occurrence_summary' in item and 'doc1' in item['occurrence_summary']:
+                doc1_data = item['occurrence_summary']['doc1']
+                occurrence_mapping[desc]['doc1_occurrences']['total_quantity'] = doc1_data.get('total_quantity', 0)
+                occurrence_mapping[desc]['doc1_occurrences']['total_rcv'] = doc1_data.get('total_rcv', 0)
+                
+                if 'occurrences_detail' in doc1_data:
+                    for occ in doc1_data['occurrences_detail']:
+                        if isinstance(occ, dict):
+                            line = occ.get('line', '')
+                            page = occ.get('page', '')
+                            qty = occ.get('quantity', 0)
+                            rcv = occ.get('rcv', 0)
+                            detail = f"Line {line} (Page {page}): Qty={qty}, RCV=${rcv:.2f}"
+                            occurrence_mapping[desc]['doc1_occurrences']['occurrences_detail'].add(detail)
+
+            # Process doc2 occurrences
+            if 'occurrence_summary' in item and 'doc2' in item['occurrence_summary']:
+                doc2_data = item['occurrence_summary']['doc2']
+                occurrence_mapping[desc]['doc2_occurrences']['total_quantity'] = doc2_data.get('total_quantity', 0)
+                occurrence_mapping[desc]['doc2_occurrences']['total_rcv'] = doc2_data.get('total_rcv', 0)
+                
+                if 'occurrences_detail' in doc2_data:
+                    for occ in doc2_data['occurrences_detail']:
+                        if isinstance(occ, dict):
+                            line = occ.get('line', '')
+                            page = occ.get('page', '')
+                            qty = occ.get('quantity', 0)
+                            rcv = occ.get('rcv', 0)
+                            detail = f"Line {line} (Page {page}): Qty={qty}, RCV=${rcv:.2f}"
+                            occurrence_mapping[desc]['doc2_occurrences']['occurrences_detail'].add(detail)
+
+        # Process categories
+        for category in df['category'].unique():
+            category_df = df[df['category'] == category]
             
-            items.append(item_data)
-        
-        categorized_items[category] = {
-            'items': items,
-            'summary': create_category_summary(items)
-        }
-    
-    return categorized_items
+            items = []
+            for _, row in category_df.iterrows():
+                # Get occurrence data from mapping
+                occurrences = occurrence_mapping.get(row['description'], {
+                    'doc1_occurrences': {'occurrences_detail': set(), 'total_quantity': 0, 'total_rcv': 0},
+                    'doc2_occurrences': {'occurrences_detail': set(), 'total_quantity': 0, 'total_rcv': 0}
+                })
+                
+                # Convert sets to lists for JSON serialization
+                doc1_occurrences = {
+                    'occurrences_detail': sorted(list(occurrences['doc1_occurrences']['occurrences_detail'])),
+                    'total_quantity': occurrences['doc1_occurrences']['total_quantity'],
+                    'total_rcv': occurrences['doc1_occurrences']['total_rcv']
+                }
+                
+                doc2_occurrences = {
+                    'occurrences_detail': sorted(list(occurrences['doc2_occurrences']['occurrences_detail'])),
+                    'total_quantity': occurrences['doc2_occurrences']['total_quantity'],
+                    'total_rcv': occurrences['doc2_occurrences']['total_rcv']
+                }
+
+                # Calculate severity
+                percentage_diff = row['percentage_cost_difference'] if not pd.isna(row['percentage_cost_difference']) else 0
+                severity = 'normal'
+                if abs(percentage_diff) >= CRITICAL_DIFFERENCE_THRESHOLD:
+                    severity = 'critical'
+                elif abs(percentage_diff) >= HIGH_DIFFERENCE_THRESHOLD:
+                    severity = 'high'
+
+                items.append({
+                    'description': row['description'],
+                    'doc1_quantity': row['doc1_quantity'],
+                    'doc2_quantity': row['doc2_quantity'],
+                    'doc1_cost': row['doc1_cost'],
+                    'doc2_cost': row['doc2_cost'],
+                    'unit': row['unit'],
+                    'cost_difference': row['cost_difference'],
+                    'percentage_difference': percentage_diff,
+                    'is_labor': bool(row['is_labor']),
+                    'is_temporary': bool(row['is_temporary']),
+                    'severity': severity,
+                    'doc1_occurrences': doc1_occurrences,
+                    'doc2_occurrences': doc2_occurrences
+                })
+
+            categorized_items[category] = {
+                'items': items,
+                'summary': {
+                    'total_items': len(items),
+                    'total_doc1_cost': category_df['doc1_cost'].sum(),
+                    'total_doc2_cost': category_df['doc2_cost'].sum(),
+                    'total_difference': category_df['cost_difference'].sum(),
+                    'average_difference_percentage': category_df['percentage_cost_difference'].mean(),
+                    'critical_items': len([item for item in items if item['severity'] == 'critical']),
+                    'high_difference_items': len([item for item in items if item['severity'] == 'high']),
+                    'labor_items': len([item for item in items if item['is_labor']]),
+                    'temporary_items': len([item for item in items if item['is_temporary']])
+                }
+            }
+
+        return categorized_items
+
+    except Exception as e:
+        logger.error(f"Error in prepare_categorized_items: {str(e)}")
+        raise
 
 def create_overall_summary(analysis_df):
     """Create summary statistics for the entire comparison"""
     return {
-        'total_items': len(analysis_df),
-        'total_discrepancies': len(analysis_df[analysis_df['cost_difference'].abs() > 0]),
+        'total_items': int(len(analysis_df)),  # Convert to native Python int
+        'total_discrepancies': int(len(analysis_df[analysis_df['cost_difference'].abs() > 0])),
         'total_cost_difference': float(analysis_df['cost_difference'].sum()),  # Convert numpy float to Python float
         'average_difference_percentage': float(analysis_df['percentage_cost_difference'].mean()),
         'categories_affected': int(analysis_df['category'].nunique())  # Convert numpy int to Python int
@@ -1000,62 +1450,179 @@ def _calculate_recoverable_amount(df):
         ]
     }
 
-def categorize_item(description):
-    """Categorize items based on common terminology and associations"""
-    matches = []
-    for category, pattern in CATEGORY_PATTERNS.items():
-        if re.search(pattern, description):
-            matches.append(category)
-    
-    # Return the first match, or 'UNCATEGORIZED' if no matches
-    return matches[0] if matches else 'UNCATEGORIZED'
-
-
-def create_analysis_ready_dataframe(comparison_results):
-    """Convert comparison results into an analysis-friendly format"""
+def extract_categories_from_recap(text: str) -> dict:
+    """Extract categories from recap section with fallback to predefined categories"""
     try:
-        df = pd.DataFrame(comparison_results['all_items_comparison'])
+        # Try to extract categories from text first
+        categories = {}
+        if text:
+            # ... existing category extraction logic ...
+            pass
+            
+        # If no categories were extracted, use predefined categories
+        if not categories:
+            logger.info("No categories found in text, using predefined categories")
+            categories = {
+                category: {
+                    'pattern': CATEGORY_PATTERNS[category],
+                    'original': False,
+                    'search_terms': category.lower().split()
+                }
+                for category in CATEGORY_PATTERNS.keys()
+            }
+            
+        return categories
         
-        # Ensure required columns exist
-        if 'unit' not in df.columns:
-            df['unit'] = 'EA'  # Default unit if missing
+    except Exception as e:
+        logger.warning(f"Error extracting categories, falling back to predefined: {str(e)}")
+        # Return predefined categories on error
+        return {
+            category: {
+                'pattern': CATEGORY_PATTERNS[category],
+                'original': False,
+                'search_terms': category.lower().split()
+            }
+            for category in CATEGORY_PATTERNS.keys()
+        }
+
+def categorize_item(description: str, categories: dict) -> str:
+    """Improved categorization function"""
+    if not description or not isinstance(description, str):
+        return 'UNCATEGORIZED'
+    
+    description = description.lower().strip()
+    
+    # Try exact matches first
+    for category, info in categories.items():
+        if re.search(info['pattern'], description):
+            return category
+    
+    # Try partial matches with individual words
+    best_match = None
+    highest_score = 0
+    
+    for category, info in categories.items():
+        search_terms = info.get('search_terms', category.lower().split())
+        description_words = set(description.split())
         
-        # Convert numeric columns to float type
-        numeric_columns = [
-            'doc1_quantity', 'doc2_quantity',
-            'doc1_cost', 'doc2_cost',
-            'cost_difference', 'quantity_difference',
-            'percentage_cost_difference'
-        ]
+        # Count matching words
+        matches = sum(1 for term in search_terms if term in description_words)
+        score = matches / len(search_terms) if search_terms else 0
         
-        for col in numeric_columns:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+        if score > highest_score and score >= 0.4:  # Lower threshold to 40% match
+            highest_score = score
+            best_match = category
+    
+    return best_match if best_match else 'UNCATEGORIZED'
+
+def create_analysis_ready_dataframe(comparison_results, categories):
+    """Create analysis dataframe with improved categorization"""
+    try:
+        logger.info(f"Creating analysis DataFrame from {len(comparison_results)} results")
         
-        # Add derived columns
-        df['category'] = df['description'].apply(lambda x: categorize_item(x) if x else 'UNKNOWN')
-        df['standardized_unit'] = df['unit'].apply(lambda x: UNIT_STANDARDIZATION.get(x, x))
-        df['is_temporary'] = df['description'].str.contains('Temporary', case=False, na=False)
-        df['is_labor'] = df['description'].str.contains('labor|hour|technician|supervisor', case=False, na=False)
+        # Check if we have the expected structure
+        if not comparison_results or 'all_items_comparison' not in comparison_results:
+            logger.warning("No comparison results or missing all_items_comparison")
+            # Return empty DataFrame with expected columns
+            return pd.DataFrame({
+                'description': [],
+                'category': [],
+                'doc1_quantity': [],
+                'doc2_quantity': [],
+                'unit': [],
+                'doc1_cost': [],
+                'doc2_cost': [],
+                'quantity_difference': [],
+                'cost_difference': [],
+                'percentage_cost_difference': [],
+                'match_confidence': []
+            })
+
+        # Convert comparison results to DataFrame
+        items = comparison_results['all_items_comparison']
+        logger.info(f"Processing {len(items)} items")
         
-        # Calculate significant difference
-        df['significant_difference'] = df['percentage_cost_difference'].apply(
-            lambda x: abs(x) > 5 if pd.notnull(x) else False
-        )
+        # Create DataFrame with explicit columns and type conversion
+        df = pd.DataFrame([{
+            'description': str(item.get('description', 'No description')),
+            'doc1_quantity': float(item.get('doc1_quantity', 0) or 0),
+            'doc2_quantity': float(item.get('doc2_quantity', 0) or 0),
+            'unit': str(item.get('unit', 'EA')),
+            'doc1_cost': float(item.get('doc1_cost', 0) or 0),
+            'doc2_cost': float(item.get('doc2_cost', 0) or 0),
+            'quantity_difference': float(item.get('quantity_difference', 0) or 0),
+            'cost_difference': float(item.get('cost_difference', 0) or 0),
+            'percentage_cost_difference': float(item.get('percentage_cost_difference', 0) or 0),
+            'match_confidence': float(item.get('match_confidence', 0) or 0)
+        } for item in items])
+        
+        # Add analysis columns with explicit type conversion
+        df['category'] = df['description'].apply(lambda x: categorize_item(x, categories))
+        df['is_labor'] = df['description'].str.contains('labor|hour|hr', case=False, na=False).astype(bool)
+        df['is_temporary'] = df['description'].str.contains('temp|temporary', case=False, na=False).astype(bool)
+        
+        logger.info(f"Final DataFrame shape: {df.shape}")
         return df
+        
     except Exception as e:
         logger.error(f"Error creating analysis-ready dataframe: {str(e)}")
-        raise
+        logger.error(f"Comparison results sample: {str(comparison_results)[:500]}")
+        # Return minimal valid DataFrame
+        return pd.DataFrame({
+            'description': ['Error processing data'],
+            'category': ['Error'],
+            'doc1_quantity': [0.0],
+            'doc2_quantity': [0.0],
+            'unit': ['EA'],
+            'doc1_cost': [0.0],
+            'doc2_cost': [0.0],
+            'quantity_difference': [0.0],
+            'cost_difference': [0.0],
+            'percentage_cost_difference': [0.0],
+            'match_confidence': [0.0],
+            'is_labor': [False],
+            'is_temporary': [False]
+        })
 
-def extract_text_from_pdf(file, doc_id):
-    """Extract text and parse line items from PDF file"""
-    text = process_pdf(file)
-    items = parse_line_items(text)
-    return items
+# Constants needed for the function above
+UNIT_STANDARDIZATION = {
+    'LF': 'LF',
+    'SF': 'SF',
+    'SY': 'SY',
+    'EA': 'EA',
+    'HR': 'HR',
+    'BG': 'BG',
+    'RL': 'RL',
+    'PR': 'PR',
+    'PK': 'PK',
+    'BX': 'BX',
+    'GL': 'GL',
+    'CF': 'CF',
+    'CY': 'CY',
+    'PC': 'PC',
+    'SET': 'SET',
+    'TON': 'TON',
+    'SQ': 'SQ',
+    'LB': 'LB',
+    'GAL': 'GL',
+    'EACH': 'EA',
+    'FOOT': 'LF',
+    'FEET': 'LF',
+    'SQUARE': 'SF',
+    'YARD': 'SY',
+    'HOUR': 'HR',
+    'BAG': 'BG',
+    'ROLL': 'RL',
+    'PAIR': 'PR',
+    'PACK': 'PK',
+    'BOX': 'BX',
+    'GALLON': 'GL'
+}
 
+# Update the compare_pdfs route to use extracted categories
 @app.route('/api/compare', methods=['POST'])
 def compare_pdfs():
-    """API endpoint to compare two PDF documents"""
+    temp_files = []  # Track temp files for cleanup
     try:
         if 'file1' not in request.files or 'file2' not in request.files:
             return jsonify({'error': 'Two PDF files are required'}), 400
@@ -1065,18 +1632,50 @@ def compare_pdfs():
         
         if not file1.filename.endswith('.pdf') or not file2.filename.endswith('.pdf'):
             return jsonify({'error': 'Both files must be PDFs'}), 400
-            
-        logger.info("Received comparison request")
+
+        # Create temporary files with .pdf extension
+        temp_file1 = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
+        temp_file2 = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
+        temp_files.extend([temp_file1.name, temp_file2.name])
+
+        # Save uploaded files to temporary files
+        file1.save(temp_file1.name)
+        file2.save(temp_file2.name)
         
-        # Extract and compare documents
-        doc1_items = extract_text_from_pdf(file1, 'doc1')
-        doc2_items = extract_text_from_pdf(file2, 'doc2')
+        # Close the temporary files to ensure they're properly written
+        temp_file1.close()
+        temp_file2.close()
+
+        # Validate PDFs before processing
+        for pdf_path in [temp_file1.name, temp_file2.name]:
+            is_valid, error_message = is_valid_pdf(pdf_path)
+            if not is_valid:
+                raise ValueError(f"Invalid PDF: {error_message}")
+
+        # Extract text from both files (do this only once)
+        with open(temp_file1.name, 'rb') as f1, open(temp_file2.name, 'rb') as f2:
+            doc1_text = process_pdf_with_ocr(f1)
+            doc2_text = process_pdf_with_ocr(f2)
         
-        # Compare items
+        # Add more detailed logging for category extraction
+        logger.info("Starting category extraction...")
+        logger.info(f"Doc1 text sample: {doc1_text[:1000]}")  # Log first 1000 chars
+        
+        doc1_categories = extract_categories_from_recap(doc1_text) or {}
+        doc2_categories = extract_categories_from_recap(doc2_text) or {}
+        
+        # Merge categories from both documents
+        merged_categories = {**doc1_categories, **doc2_categories}
+        
+        # Parse items using the already extracted text
+        doc1_items = parse_line_items(doc1_text)
+        doc2_items = parse_line_items(doc2_text)
+        
+        # Continue with comparison
         comparison_results = compare_line_items(doc1_items, doc2_items)
         
         # Create analysis dataframe
-        analysis_df = create_analysis_ready_dataframe(comparison_results)
+        analysis_df = create_analysis_ready_dataframe(comparison_results, merged_categories)
         
         # Generate insights and summaries
         categorized_items = prepare_categorized_items(analysis_df, comparison_results)
@@ -1098,10 +1697,17 @@ def compare_pdfs():
             }
         }
         
+        # After categorization
+        category_counts = analysis_df['category'].value_counts()
+        logger.info(f"Category distribution: {category_counts.to_dict()}")
+        
+        # Extract categories with detailed logging
+        logger.info("Extracting categories from document 1...")
+        
         return jsonify(response)
         
     except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
+        logger.error(f"Error processing request: {str(e)}\n{traceback.format_exc()}")
         return jsonify({
             'error': str(e),
             'comparison_results': {},
@@ -1122,6 +1728,285 @@ def compare_pdfs():
                 'comparison_date': datetime.now().isoformat()
             }
         }), 500
+        
+    finally:
+        # Clean up temporary files
+        for temp_file in temp_files:
+            try:
+                os.unlink(temp_file)
+            except Exception as e:
+                logger.warning(f"Error cleaning up temporary file {temp_file}: {str(e)}")
+
+def extract_line_item_details(line: str, page_number: int, line_number: int) -> dict:
+    """Extract quantity, unit, and total cost from a line item"""
+    try:
+        # Pattern to match the entire line structure
+        # Matches: quantity/unit at start and final cost at end
+        pattern = r"""
+            ^                           # Start of line
+            (?:(\d+(?:\.\d+)?          # Quantity (numeric)
+            \s*                        # Optional space
+            (?:[A-Z]{1,3})?           # Optional unit (1-3 uppercase letters)
+            )\s+)?                     # End quantity/unit group, make optional
+            .*?                        # Any text in between
+            (\d{1,3}(?:,\d{3})*(?:\.\d{2})?  # Final cost (with optional commas and decimals)
+            $                           # End of line
+        """
+        
+        match = re.search(pattern, line.strip(), re.VERBOSE)
+        if match:
+            quantity_str = match.group(1) if match.group(1) else ''
+            total_cost = float(match.group(2).replace(',', ''))
+            
+            # Extract unit from quantity string
+            unit_match = re.search(r'([A-Z]{1,3})$', quantity_str)
+            unit = unit_match.group(1) if unit_match else 'EA'
+            
+            # Clean quantity to just the numeric value
+            quantity = re.match(r'\d+(?:\.\d+)?', quantity_str)
+            quantity = float(quantity.group(0)) if quantity else 1.0
+            
+            return {
+                'quantity': quantity,
+                'unit': unit,
+                'total_cost': total_cost,
+                'page_number': page_number,
+                'line_number': line_number,
+                'raw_text': line.strip()
+            }
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error extracting line item details: {str(e)}")
+        return None
+
+def process_document_lines(text: str) -> list:
+    """Process document and extract all line items with their details"""
+    line_items = []
+    current_page = 1
+    
+    # Split text into pages (assuming pages are separated by some marker)
+    pages = text.split('Page:')  # Adjust separator based on your document format
+    
+    for page_num, page_text in enumerate(pages, 1):
+        lines = page_text.split('\n')
+        
+        for line_num, line in enumerate(lines, 1):
+            item_details = extract_line_item_details(line, page_num, line_num)
+            if item_details:
+                line_items.append(item_details)
+    
+    return line_items
+
+def track_item_occurrences(line_items: list) -> dict:
+    """Track occurrences of similar items across the document"""
+    occurrences = {}
+    
+    for item in line_items:
+        # Create a key based on quantity and unit
+        key = f"{item['quantity']}{item['unit']}"
+        
+        if key not in occurrences:
+            occurrences[key] = {
+                'locations': [],
+                'total_quantity': 0,
+                'total_cost': 0
+            }
+        
+        occurrences[key]['locations'].append({
+            'page': item['page_number'],
+            'line': item['line_number'],
+            'cost': item['total_cost']
+        })
+        occurrences[key]['total_quantity'] += item['quantity']
+        occurrences[key]['total_cost'] += item['total_cost']
+    
+    return occurrences
+
+def normalize_line_items(text):
+    """Extract and normalize line items from insurance estimate sheets"""
+    try:
+        aggregated_items = {}
+        
+        for match in re.finditer(line_item_pattern, text, re.MULTILINE | re.VERBOSE):
+            # Extract basic info
+            line_num = match.group('line_num')
+            quantity = float(match.group('quantity').replace(',', ''))
+            page_num = match.group('page_num') or '1'
+            raw_description = match.group('description').strip()
+            unit_cost = float(match.group('unit_cost').replace(',', ''))
+            rcv = float(match.group('rcv').replace(',', ''))
+            
+            # Create occurrence detail for this specific line
+            occurrence_detail = f"Line {line_num}, Qty {quantity} Page {page_num}"
+            
+            if raw_description in aggregated_items:
+                # Item exists - add this occurrence and update totals
+                item = aggregated_items[raw_description]
+                item['quantity'] += quantity
+                item['rcv'] += rcv
+                item['doc1_occurrences']['occurrences_detail'].append(occurrence_detail)
+                item['doc1_occurrences']['total_quantity'] += quantity
+                item['doc1_occurrences']['total_rcv'] += rcv
+            else:
+                # New item - create first occurrence
+                aggregated_items[raw_description] = {
+                    'description': raw_description,
+                    'quantity': quantity,
+                    'unit': match.group('unit'),
+                    'unit_cost': unit_cost,
+                    'rcv': rcv,
+                    'doc1_occurrences': {
+                        'occurrences_detail': [occurrence_detail],
+                        'total_quantity': quantity,
+                        'total_rcv': rcv
+                    }
+                }
+        
+        return list(aggregated_items.values())
+
+    except Exception as e:
+        logger.error(f"Error normalizing line items: {str(e)}")
+        raise
+
+def compare_pdfs(doc1_text, doc2_text):
+    logger.info("Starting PDF comparison...")
+    
+    # Initialize default categories as a dictionary
+    default_categories = dict.fromkeys([
+        'ACCESSORIES - MOBILE HOME',
+        'FLOOR COVERING',
+        'OFFICE SUPPLIES',
+        'PLUMBING',
+        'PAINTING',
+        'ROOFING',
+        'SIDING',
+        'SPECIALTY ITEMS',
+        'STEEL COMPONENTS',
+        'STAIRS',
+        'TILE',
+        'TOOLS',
+        'WINDOWS',
+        'APPLIANCES',
+        'CABINETRY',
+        'CLEANING',
+        'CONCRETE & ASPHALT',
+        'DOORS',
+        'DRYWALL',
+        'ELECTRICAL',
+        'FENCING',
+        'FINISH CARPENTRY',
+        'FIREPLACES',
+        'FRAMING & CARPENTRY',
+        'HVAC',
+        'INSULATION',
+        'LANDSCAPING',
+        'MASONRY'
+    ], [])
+
+    # Initialize categories with empty lists
+    doc1_categories = default_categories.copy()
+    doc2_categories = default_categories.copy()
+
+    # Initialize comparison results
+    comparison_results = {
+        'matched_items': [],
+        'unmatched_items_doc1': [],
+        'unmatched_items_doc2': [],
+        'error': None
+    }
+
+    try:
+        logger.info("Processing document texts...")
+        
+        # Ensure we have text to process
+        if not doc1_text or not doc2_text:
+            raise ValueError("Missing document text")
+
+        # Process documents
+        doc1_items = normalize_line_items(doc1_text) or []
+        doc2_items = normalize_line_items(doc2_text) or []
+
+        logger.info(f"Processed items - Doc1: {len(doc1_items)}, Doc2: {len(doc2_items)}")
+
+        # Ensure doc1_categories is properly initialized before categorizing
+        if not isinstance(doc1_categories, dict):
+            doc1_categories = default_categories.copy()
+        
+        if not isinstance(doc2_categories, dict):
+            doc2_categories = default_categories.copy()
+
+        # Categorize items for doc1
+        for item in doc1_items:
+            if not item or 'description' not in item:
+                continue
+                
+            categorized = False
+            for category, pattern in CATEGORY_PATTERNS.items():
+                if category not in doc1_categories:
+                    doc1_categories[category] = []
+                    
+                if re.search(pattern, str(item.get('description', '')), re.IGNORECASE):
+                    doc1_categories[category].append(item)
+                    categorized = True
+                    break
+                    
+            if not categorized:
+                if 'SPECIALTY ITEMS' not in doc1_categories:
+                    doc1_categories['SPECIALTY ITEMS'] = []
+                doc1_categories['SPECIALTY ITEMS'].append(item)
+
+        # Categorize items for doc2
+        for item in doc2_items:
+            if not item or 'description' not in item:
+                continue
+                
+            categorized = False
+            for category, pattern in CATEGORY_PATTERNS.items():
+                if category not in doc2_categories:
+                    doc2_categories[category] = []
+                    
+                if re.search(pattern, str(item.get('description', '')), re.IGNORECASE):
+                    doc2_categories[category].append(item)
+                    categorized = True
+                    break
+                    
+            if not categorized:
+                if 'SPECIALTY ITEMS' not in doc2_categories:
+                    doc2_categories['SPECIALTY ITEMS'] = []
+                doc2_categories['SPECIALTY ITEMS'].append(item)
+
+        # Update comparison results
+        comparison_results.update({
+            'unmatched_items_doc1': doc1_items,
+            'unmatched_items_doc2': doc2_items
+        })
+
+        logger.info(f"Successfully categorized items")
+        logger.info(f"Doc1 categories count: {len(doc1_categories)}")
+        logger.info(f"Doc2 categories count: {len(doc2_categories)}")
+
+    except Exception as e:
+        logger.error(f"Error in compare_pdfs: {str(e)}\n{traceback.format_exc()}")
+        comparison_results['error'] = str(e)
+    
+    finally:
+        # Ensure we're returning valid dictionaries
+        if not isinstance(doc1_categories, dict):
+            doc1_categories = default_categories.copy()
+        if not isinstance(doc2_categories, dict):
+            doc2_categories = default_categories.copy()
+            
+        return {
+            'doc1_categories': doc1_categories,
+            'doc2_categories': doc2_categories,
+            'comparison_results': comparison_results
+        }
 
 if __name__ == '__main__':
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
     app.run(debug=True)

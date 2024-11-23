@@ -52,64 +52,101 @@ const formatQuantity = (value: any): string => {
 };
 
 const combineRedundantItems = (items: any[]) => {
+  if (!items || !Array.isArray(items)) return [];
+  
+  // Helper function to extract and sum values from occurrence details
+  const calculateTotalsFromDetails = (details: string[]) => {
+    let totalQuantity = 0;
+    let totalRcv = 0;
+
+    details.forEach(detail => {
+      // Extract quantity and RCV from detail string
+      // Format example: "Line 1 (Page 1): Qty=2, RCV=$100.00"
+      const qtyMatch = detail.match(/Qty=(\d*\.?\d*)/);
+      const rcvMatch = detail.match(/RCV=\$(\d*\.?\d*)/);
+      
+      if (qtyMatch && qtyMatch[1]) {
+        totalQuantity += parseFloat(qtyMatch[1]);
+      }
+      if (rcvMatch && rcvMatch[1]) {
+        totalRcv += parseFloat(rcvMatch[1]);
+      }
+    });
+
+    return { totalQuantity, totalRcv };
+  };
+
+  // First, normalize all descriptions to avoid case/spacing mismatches
   const combinedItems = items.reduce((acc, item) => {
+    // Use description as the key for matching similar items
     const key = item.description?.toLowerCase().trim();
     if (!key) return acc;
 
     if (!acc[key]) {
-      acc[key] = { ...item };
+      // First occurrence of this item
+      const doc1Details = item.doc1_occurrences?.occurrences_detail || [];
+      const doc2Details = item.doc2_occurrences?.occurrences_detail || [];
+      
+      // Calculate totals from occurrence details
+      const doc1Totals = calculateTotalsFromDetails(doc1Details);
+      const doc2Totals = calculateTotalsFromDetails(doc2Details);
+
+      acc[key] = {
+        ...item,
+        doc1_occurrences: {
+          occurrences_detail: new Set(doc1Details),
+          total_quantity: doc1Totals.totalQuantity,
+          total_rcv: doc1Totals.totalRcv
+        },
+        doc2_occurrences: {
+          occurrences_detail: new Set(doc2Details),
+          total_quantity: doc2Totals.totalQuantity,
+          total_rcv: doc2Totals.totalRcv
+        }
+      };
     } else {
-      // Combine costs
-      acc[key].doc1_cost =
-        safeNumber(acc[key].doc1_cost) + safeNumber(item.doc1_cost);
-      acc[key].doc2_cost =
-        safeNumber(acc[key].doc2_cost) + safeNumber(item.doc2_cost);
-
-      // Combine quantities
-      acc[key].doc1_quantity =
-        safeNumber(acc[key].doc1_quantity) + safeNumber(item.doc1_quantity);
-      acc[key].doc2_quantity =
-        safeNumber(acc[key].doc2_quantity) + safeNumber(item.doc2_quantity);
-
-      // Combine and deduplicate occurrences
-      if (item.doc1_occurrences && acc[key].doc1_occurrences) {
-        const existingDetails = new Set(
-          acc[key].doc1_occurrences.occurrences_detail
-        );
-        item.doc1_occurrences.occurrences_detail.forEach((detail: string) =>
-          existingDetails.add(detail)
-        );
-        acc[key].doc1_occurrences.occurrences_detail =
-          Array.from(existingDetails);
-        acc[key].doc1_occurrences.total_quantity =
-          safeNumber(acc[key].doc1_occurrences.total_quantity) +
-          safeNumber(item.doc1_occurrences.total_quantity);
-        acc[key].doc1_occurrences.total_rcv =
-          safeNumber(acc[key].doc1_occurrences.total_rcv) +
-          safeNumber(item.doc1_occurrences.total_rcv);
+      // Found another occurrence of the same item
+      if (item.doc1_occurrences?.occurrences_detail) {
+        item.doc1_occurrences.occurrences_detail.forEach((detail: string) => {
+          acc[key].doc1_occurrences.occurrences_detail.add(detail);
+        });
+      }
+      
+      if (item.doc2_occurrences?.occurrences_detail) {
+        item.doc2_occurrences.occurrences_detail.forEach((detail: string) => {
+          acc[key].doc2_occurrences.occurrences_detail.add(detail);
+        });
       }
 
-      if (item.doc2_occurrences && acc[key].doc2_occurrences) {
-        const existingDetails = new Set(
-          acc[key].doc2_occurrences.occurrences_detail
-        );
-        item.doc2_occurrences.occurrences_detail.forEach((detail: string) =>
-          existingDetails.add(detail)
-        );
-        acc[key].doc2_occurrences.occurrences_detail =
-          Array.from(existingDetails);
-        acc[key].doc2_occurrences.total_quantity =
-          safeNumber(acc[key].doc2_occurrences.total_quantity) +
-          safeNumber(item.doc2_occurrences.total_quantity);
-        acc[key].doc2_occurrences.total_rcv =
-          safeNumber(acc[key].doc2_occurrences.total_rcv) +
-          safeNumber(item.doc2_occurrences.total_rcv);
-      }
+      // Recalculate totals after adding new occurrences
+      const doc1Totals = calculateTotalsFromDetails(
+        Array.from(acc[key].doc1_occurrences.occurrences_detail)
+      );
+      const doc2Totals = calculateTotalsFromDetails(
+        Array.from(acc[key].doc2_occurrences.occurrences_detail)
+      );
+
+      // Update totals
+      acc[key].doc1_occurrences.total_quantity = doc1Totals.totalQuantity;
+      acc[key].doc1_occurrences.total_rcv = doc1Totals.totalRcv;
+      acc[key].doc2_occurrences.total_quantity = doc2Totals.totalQuantity;
+      acc[key].doc2_occurrences.total_rcv = doc2Totals.totalRcv;
     }
     return acc;
   }, {});
 
-  return Object.values(combinedItems);
+  // Convert back to array and convert Sets back to arrays
+  return Object.values(combinedItems).map(item => ({
+    ...item,
+    doc1_occurrences: {
+      ...item.doc1_occurrences,
+      occurrences_detail: Array.from(item.doc1_occurrences.occurrences_detail)
+    },
+    doc2_occurrences: {
+      ...item.doc2_occurrences,
+      occurrences_detail: Array.from(item.doc2_occurrences.occurrences_detail)
+    }
+  }));
 };
 
 const adjustPageNumbers = (occurrences: any) => {
@@ -178,20 +215,20 @@ const ComparisonApp = () => {
     setError(null);
 
     try {
-      const uploadPromises = await Promise.all([
-        put(`estimates/${Date.now()}-${files.file1.name}`, files.file1, {
-          access: "public",
-          token:
-            "vercel_blob_rw_9ylyweWN5g4q973s_CWIJJrVXOesAKMWGnela0arrEmre2R",
-        }),
-        put(`estimates/${Date.now()}-${files.file2.name}`, files.file2, {
-          access: "public",
-          token:
-            "vercel_blob_rw_9ylyweWN5g4q973s_CWIJJrVXOesAKMWGnela0arrEmre2R",
-        }),
-      ]);
+      // const uploadPromises = await Promise.all([
+      //   put(`estimates/${Date.now()}-${files.file1.name}`, files.file1, {
+      //     access: "public",
+      //     token:
+      //       "vercel_blob_rw_9ylyweWN5g4q973s_CWIJJrVXOesAKMWGnela0arrEmre2R",
+      //   }),
+      //   put(`estimates/${Date.now()}-${files.file2.name}`, files.file2, {
+      //     access: "public",
+      //     token:
+      //       "vercel_blob_rw_9ylyweWN5g4q973s_CWIJJrVXOesAKMWGnela0arrEmre2R",
+      //   }),
+      // ]);
 
-      const [blob1, blob2] = uploadPromises;
+      // const [blob1, blob2] = uploadPromises;
 
       // Proceed with original file processing
       const formData = new FormData();
@@ -199,7 +236,7 @@ const ComparisonApp = () => {
       formData.append("file2", files.file2);
 
       const response = await fetch(
-        "https://hunter10471.eu.pythonanywhere.com/api/compare",
+        "https://api.getgrunt.co/api/compare",
         // "http://localhost:5000/api/compare",
         {
           method: "POST",
@@ -297,11 +334,11 @@ const ComparisonApp = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Your Estimate</p>
               <p className="text-xl font-semibold">
-                {formatCurrency(safe(item.doc1_cost))}
+                {formatCurrency(safe(item.doc1_occurrences?.total_rcv))}
               </p>
-              {item.doc1_quantity && (
+              {item.doc1_occurrences?.total_quantity && (
                 <p className="text-sm text-gray-600">
-                  Quantity: {formatQuantity(safe(item.doc1_quantity))}{" "}
+                  Quantity: {formatQuantity(safe(item.doc1_occurrences.total_quantity))}{" "}
                   {item.unit || "EA"}
                 </p>
               )}
@@ -342,11 +379,11 @@ const ComparisonApp = () => {
                 Carrier Estimate
               </p>
               <p className="text-xl font-semibold">
-                {formatCurrency(safe(item.doc2_cost))}
+                {formatCurrency(safe(item.doc2_occurrences.total_rcv))}
               </p>
-              {item.doc2_quantity && (
+              {item.doc2_occurrences?.total_quantity && (
                 <p className="text-sm text-gray-600">
-                  Quantity: {formatQuantity(safe(item.doc2_quantity))}{" "}
+                  Quantity: {formatQuantity(safe(item.doc2_occurrences.total_quantity))}{" "}
                   {item.unit || "EA"}
                 </p>
               )}
@@ -923,7 +960,7 @@ const ComparisonApp = () => {
                             <span className="text-sm text-gray-500">
                               Difference:{" "}
                               {formatCurrency(
-                                details?.summary?.total_cost_difference
+                                details?.summary?.total_difference
                               )}
                             </span>
                           </div>

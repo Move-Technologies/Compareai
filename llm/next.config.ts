@@ -7,6 +7,25 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    return [
+        {
+            source: '/api/:path*',
+            destination: 'https://3.227.241.228/:path*' // Now using HTTPS
+        }
+    ]
+},
+webpack: (config, { isServer }) => {
+  if (!isServer) {
+      config.resolve.fallback = {
+          ...config.resolve.fallback,
+          net: false,
+          tls: false,
+          fs: false,
+      };
+  }
+  return config;
+},
 };
 
 export default nextConfig;
