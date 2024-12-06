@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 10;
@@ -25,14 +26,7 @@ const formatCurrency = (value) => {
 
 const VarianceComparison = ({ data }: { data: any }) => {
   const dataRows = data?.recap_comparison?.comparison_results || [];
-  const [currentPage, setCurrentPage] = useState(3);
-
-  const paginatedData = dataRows.slice(
-    currentPage * ITEMS_PER_PAGE,
-    (currentPage + 1) * ITEMS_PER_PAGE
-  );
-  console.log(paginatedData);
-
+  const [showMore, setShowMore] = React.useState(false);
   // Calculate totals
   const calculateTotals = () => {
     let estimate1Total = 0;
@@ -53,13 +47,21 @@ const VarianceComparison = ({ data }: { data: any }) => {
 
   const totals = calculateTotals();
 
+  function handleShowMore() {
+    setShowMore(!showMore);
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Category Comparison Recap</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative w-full overflow-x-auto">
+        <div
+          className={cn("relative w-full overflow-x-auto overflow-y-hidden", {
+            "h-[300px]": !showMore,
+          })}
+        >
           <Table className="w-[600px] relative">
             <TableHeader>
               <TableRow>
@@ -72,7 +74,7 @@ const VarianceComparison = ({ data }: { data: any }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedData.map((row, idx) => (
+              {dataRows.map((row, idx) => (
                 <TableRow key={`row-recap-${idx}`} className="border-b">
                   <TableCell className="py-2" colSpan={1}>
                     {row.category}
@@ -104,11 +106,23 @@ const VarianceComparison = ({ data }: { data: any }) => {
               ))}
             </TableBody>
           </Table>
+          {/* {!showMore && (
+            <>
+              <div className="absolute w-full h-1/2 bottom-0 flex flex-col items-center">
+                <Button
+                  className="w-fit mt-10 absolute z-10"
+                  onClick={handleShowMore}
+                >
+                  Show more
+                </Button>
+              </div>
+              <div className="h-full w-full pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-gray-50"></div>
+            </>
+          )} */}
         </div>
       </CardContent>
     </Card>
   );
 };
-
 
 export default VarianceComparison;

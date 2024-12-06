@@ -816,7 +816,7 @@ const ComparisonApp = () => {
             <div className="flex items-center mb-4">
               <FileText className="mr-2" />
               <h2 className="text-lg font-semibold">
-                {fileKey === "file1" ? "Your Estimate" : "Carrier's Estimate"}
+                {fileKey === "file1" ? "Your Estimate" : "Other's Estimate"}
               </h2>
             </div>
 
