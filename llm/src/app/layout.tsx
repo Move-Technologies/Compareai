@@ -31,10 +31,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar />
-        <main className="flex flex-col min-h-[calc(100vh-96px)] items-center justify-center gap-20 px-5 mt-24 ">
-          {children}
+        <div className="flex flex-col h-full min-h-[calc(100vh-96px)] justify-start gap-20 mt-24 px-5 border-8 border-black">
+          <main className="flex-1">{children}</main>
           <Footer />
-        </main>
+        </div>
       </body>
     </html>
   );

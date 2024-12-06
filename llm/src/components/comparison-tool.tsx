@@ -800,7 +800,7 @@ const ComparisonApp = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="w-full max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">
           Insurance Estimate Comparison
@@ -880,8 +880,9 @@ const ComparisonApp = () => {
       {result && (
         <div className="mt-8 space-y-6">
           <Tabs defaultValue="appraiser" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="appraiser">Recap</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 gap-2">
+              <TabsTrigger value="appraiser">Recap By Category</TabsTrigger>
+              <TabsTrigger value="appraiser">Recap By Room</TabsTrigger>
               {/* <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="discrepancies">Discrepancies</TabsTrigger>
               <TabsTrigger value="unique">Unique Items</TabsTrigger> */}
