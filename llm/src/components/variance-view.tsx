@@ -104,47 +104,11 @@ const VarianceComparison = ({ data }: { data: any }) => {
               ))}
             </TableBody>
           </Table>
-          <Pagination
-            currentPage={currentPage}
-            numberOfRows={dataRows.length}
-            setCurrentPage={setCurrentPage}
-          />
         </div>
       </CardContent>
     </Card>
   );
 };
 
-function Pagination({
-  setCurrentPage,
-  currentPage,
-  numberOfRows,
-}: {
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-  currentPage: number;
-  numberOfRows: number;
-}) {
-  const numberOfPages = Math.ceil(numberOfRows / ITEMS_PER_PAGE);
-  if (numberOfPages <= 1) return;
-
-  return (
-    <div className="flex justify-center mx-auto w-fit mt-4  border border-gray-300 rounded-sm">
-      {Array.from({ length: numberOfPages }).map((_, index) => (
-        <span
-          key={index}
-          className={cn(
-            `cursor-pointer  duration-200 text-primary py-0.5 px-2 border-l first:border-l-0 hover:bg-muted rounded-sm`,
-            {
-              "bg-muted": index === currentPage,
-            }
-          )}
-          onClick={() => setCurrentPage(index)}
-        >
-          {index + 1}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 export default VarianceComparison;
