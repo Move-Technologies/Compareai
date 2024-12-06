@@ -32,6 +32,7 @@ export default function RootLayout({
       >
         <Navbar />
         <main className="flex flex-col min-h-[calc(100vh-96px)] items-center justify-center gap-20 px-5 mt-24 ">
+        this is a test
           {children}
           <Footer />
         </main>
