@@ -1,0 +1,28 @@
+2024-12-06 16:49:12,826 - ERROR - Error processing request: document closed
+Traceback (most recent call last):
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/app.py", line 195, in compare_pdfs
+    recap_comparison = compare_recap_categories(temp_file1.name, temp_file2.name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/app.py", line 342, in compare_recap_categories
+    your_estimate_col_data = extract_recap_data(file1_path)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/app.py", line 337, in extract_recap_data
+    pdf_op.close()
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/venv/lib/python3.12/site-packages/pymupdf/__init__.py", line 3845, in close
+    raise ValueError("document closed")
+ValueError: document closed
+
+2024-12-06 16:52:05,954 - ERROR - Error processing request: document closed
+Traceback (most recent call last):
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/app.py", line 195, in compare_pdfs
+    recap_comparison = compare_recap_categories(temp_file1.name, temp_file2.name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/app.py", line 343, in compare_recap_categories
+    your_estimate_col_data = extract_recap_data(file1_path)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/app.py", line 337, in extract_recap_data
+    pdf_op.close()
+  File "/Users/rumman/Downloads/Compareai-master/flask-backend/venv/lib/python3.12/site-packages/pymupdf/__init__.py", line 3845, in close
+    raise ValueError("document closed")
+ValueError: document closed
+
