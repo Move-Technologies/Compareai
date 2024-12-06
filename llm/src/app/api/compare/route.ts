@@ -10,7 +10,7 @@ export async function POST(request) {
             rejectUnauthorized: false
         });
 
-        const response = await fetch('https://3.227.241.228/api/compare', {
+        const response = await fetch('http://127.0.0.1:5000/api/compare', {
             method: 'POST',
             body: formData,
             agent: httpsAgent,

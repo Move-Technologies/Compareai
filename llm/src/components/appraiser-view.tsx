@@ -29,26 +29,27 @@ const AppraiserView = ({ data }: { data: any }) => {
 
   // Group items by their pricing variance percentage
   const getPricingVarianceGroups = () => {
-    const allItems = Object.values(data.categorized_items)
-      .flatMap((category) => category.items || [])
-      .filter((item) => item.percentage_difference !== undefined);
+    const allItems = [];
+    // const allItems = Object.values(data.categorized_items)
+    //   .flatMap((category) => category.items || [])
+    //   .filter((item) => item.percentage_difference !== undefined);
 
-    return {
-      highVariance: allItems.filter(
-        (item) => Math.abs(item.percentage_difference) > 20
-      ),
-      moderateVariance: allItems.filter(
-        (item) =>
-          Math.abs(item.percentage_difference) <= 20 &&
-          Math.abs(item.percentage_difference) > 10
-      ),
-      lowVariance: allItems.filter(
-        (item) => Math.abs(item.percentage_difference) <= 10
-      ),
-    };
+    // return {
+    //   highVariance: allItems.filter(
+    //     (item) => Math.abs(item.percentage_difference) > 20
+    //   ),
+    //   moderateVariance: allItems.filter(
+    //     (item) =>
+    //       Math.abs(item.percentage_difference) <= 20 &&
+    //       Math.abs(item.percentage_difference) > 10
+    //   ),
+    //   lowVariance: allItems.filter(
+    //     (item) => Math.abs(item.percentage_difference) <= 10
+    //   ),
+    // };
   };
 
-  const varianceGroups = getPricingVarianceGroups();
+  // const varianceGroups = getPricingVarianceGroups();
 
   return (
     <div className="space-y-6">
@@ -64,7 +65,7 @@ const AppraiserView = ({ data }: { data: any }) => {
                 High Variance Items
               </h3>
               <p className="text-2xl font-bold text-red-800">
-                {varianceGroups.highVariance.length}
+             "   {/* {varianceGroups.highVariance.length}' */}"
               </p>
               <p className="text-sm text-red-600">Above 20% variance</p>
             </div>
@@ -73,7 +74,7 @@ const AppraiserView = ({ data }: { data: any }) => {
                 Moderate Variance Items
               </h3>
               <p className="text-2xl font-bold text-yellow-800">
-                {varianceGroups.moderateVariance.length}
+                "{/* {varianceGroups.moderateVariance.length} */}"
               </p>
               <p className="text-sm text-yellow-600">10-20% variance</p>
             </div>
@@ -82,7 +83,7 @@ const AppraiserView = ({ data }: { data: any }) => {
                 Market-Aligned Items
               </h3>
               <p className="text-2xl font-bold text-green-800">
-                {varianceGroups.lowVariance.length}
+                "{/* {varianceGroups.lowVa"riance.length} */}"
               </p>
               <p className="text-sm text-green-600">Under 10% variance</p>
             </div>
@@ -91,11 +92,11 @@ const AppraiserView = ({ data }: { data: any }) => {
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="high-variance">
               <AccordionTrigger>
-                High Variance Items ({varianceGroups.highVariance.length})
+                {/* High Variance Items ({varianceGroups.highVariance.length}) */}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4">
-                  {varianceGroups.highVariance.map((item, index) => (
+                  {/* {varianceGroups.highVariance.map((item, index) => (
                     <div key={index} className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -125,7 +126,7 @@ const AppraiserView = ({ data }: { data: any }) => {
                         </div>
                       )}
                     </div>
-                  ))}
+                  ))} */}
                 </div>
               </AccordionContent>
             </AccordionItem>

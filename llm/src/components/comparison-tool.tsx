@@ -59,7 +59,7 @@ const combineRedundantItems = (items: any[]) => {
     let totalQuantity = 0;
     let totalRcv = 0;
 
-    details.forEach(detail => {
+    details.forEach((detail) => {
       // Extract quantity and RCV from detail string
       // Format example: "Line 1 (Page 1): Qty=2, RCV=$100.00"
       const qtyMatch = detail.match(/Qty=(\d*\.?\d*)/);
@@ -96,13 +96,13 @@ const combineRedundantItems = (items: any[]) => {
         doc1_occurrences: {
           occurrences_detail: new Set(doc1Details),
           total_quantity: doc1Totals.totalQuantity,
-          total_rcv: doc1Totals.totalRcv
+          total_rcv: doc1Totals.totalRcv,
         },
         doc2_occurrences: {
           occurrences_detail: new Set(doc2Details),
           total_quantity: doc2Totals.totalQuantity,
-          total_rcv: doc2Totals.totalRcv
-        }
+          total_rcv: doc2Totals.totalRcv,
+        },
       };
     } else {
       // Found another occurrence of the same item
@@ -136,16 +136,16 @@ const combineRedundantItems = (items: any[]) => {
   }, {});
 
   // Convert back to array and convert Sets back to arrays
-  return Object.values(combinedItems).map(item => ({
+  return Object.values(combinedItems).map((item) => ({
     ...item,
     doc1_occurrences: {
       ...item.doc1_occurrences,
-      occurrences_detail: Array.from(item.doc1_occurrences.occurrences_detail)
+      occurrences_detail: Array.from(item.doc1_occurrences.occurrences_detail),
     },
     doc2_occurrences: {
       ...item.doc2_occurrences,
-      occurrences_detail: Array.from(item.doc2_occurrences.occurrences_detail)
-    }
+      occurrences_detail: Array.from(item.doc2_occurrences.occurrences_detail),
+    },
   }));
 };
 
@@ -236,8 +236,9 @@ const ComparisonApp = () => {
       formData.append("file2", files.file2);
 
       const response = await fetch(
-        // "https://api.getgrunt.co/api/compare",
-          "http://localhost:5000/api/compare",
+        "https://api.getgrunt.co/api/compare",
+        // "http://localhost:5000/api/compare",
+        // "https://flask-hello-world-lake-nu.vercel.app/api/compare",
         {
           method: "POST",
           body: formData,
@@ -338,7 +339,8 @@ const ComparisonApp = () => {
               </p>
               {item.doc1_occurrences?.total_quantity && (
                 <p className="text-sm text-gray-600">
-                  Quantity: {formatQuantity(safe(item.doc1_occurrences.total_quantity))}{" "}
+                  Quantity:{" "}
+                  {formatQuantity(safe(item.doc1_occurrences.total_quantity))}{" "}
                   {item.unit || "EA"}
                 </p>
               )}
@@ -383,7 +385,8 @@ const ComparisonApp = () => {
               </p>
               {item.doc2_occurrences?.total_quantity && (
                 <p className="text-sm text-gray-600">
-                  Quantity: {formatQuantity(safe(item.doc2_occurrences.total_quantity))}{" "}
+                  Quantity:{" "}
+                  {formatQuantity(safe(item.doc2_occurrences.total_quantity))}{" "}
                   {item.unit || "EA"}
                 </p>
               )}
@@ -797,7 +800,7 @@ const ComparisonApp = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">
           Insurance Estimate Comparison
@@ -873,7 +876,7 @@ const ComparisonApp = () => {
           </div>
         </div>
       )}
-
+      {/* here are the tabs */}
       {result && (
         <div className="mt-8 space-y-6">
           <Tabs defaultValue="appraiser" className="w-full">
@@ -915,7 +918,8 @@ const ComparisonApp = () => {
                         Total Discrepancies
                       </p>
                       <p className="text-2xl font-bold">
-                        {result.overall_summary.total_discrepancies}
+                        {/* {result.overall_summary.total_discrepancies} */}
+                        "result.overall_summary.total_discrepancies"
                       </p>
                     </div>
                     {/* <div>
@@ -931,9 +935,10 @@ const ComparisonApp = () => {
                         Average Difference
                       </p>
                       <p className="text-2xl font-bold">
-                        {formatPercentage(
+                        {/* {formatPercentage(
                           result.overall_summary.average_difference_percentage
-                        )}
+                        )} */}
+                        " result.overall_summary.average_difference_percentage"
                         %
                       </p>
                     </div>
@@ -946,107 +951,7 @@ const ComparisonApp = () => {
 
               {/* Categories Content */}
               <Accordion type="single" collapsible className="w-full">
-                {Object.entries(result.categorized_items).map(
-                  ([category, details]) => {
-                    // Combine redundant items before rendering
-                    const combinedItems = combineRedundantItems(
-                      details?.items || []
-                    );
-                    return (
-                      <AccordionItem key={category} value={category}>
-                        <AccordionTrigger className="hover:no-underline">
-                          <div className="flex flex-1 justify-between items-center">
-                            <span className="font-medium">{category}</span>
-                            <span className="text-sm text-gray-500">
-                              Difference:{" "}
-                              {formatCurrency(
-                                details?.summary?.total_difference
-                              )}
-                            </span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-4">
-                            {/* Category Summary */}
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div>
-                                  <p className="text-sm text-gray-500">
-                                    Total Items
-                                  </p>
-                                  <p className="font-medium">
-                                    {safeNumber(details?.summary?.total_items)}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-gray-500">
-                                    Average Difference
-                                  </p>
-                                  <p className="font-medium">
-                                    {formatPercentage(
-                                      details?.summary?.average_cost_difference
-                                    )}
-                                    %
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-gray-500">
-                                    Total Difference
-                                  </p>
-                                  <p className="font-medium">
-                                    {formatCurrency(
-                                      details?.summary?.total_cost_difference
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Optional: Show occurrence information if available */}
-                              {details?.summary?.total_doc1_occurrences !==
-                                undefined && (
-                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                  <div>
-                                    <p className="text-sm text-gray-500">
-                                      Occurrences
-                                    </p>
-                                    <p className="font-medium">
-                                      Doc1:{" "}
-                                      {safeNumber(
-                                        details?.summary?.total_doc1_occurrences
-                                      )}
-                                      <br />
-                                      Doc2:{" "}
-                                      {safeNumber(
-                                        details?.summary?.total_doc2_occurrences
-                                      )}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="text-sm text-gray-500">
-                                      Quantity Difference
-                                    </p>
-                                    <p className="font-medium">
-                                      {formatPercentage(
-                                        details?.summary
-                                          ?.quantity_difference_percentage
-                                      )}
-                                      %
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Line Items */}
-                            <div className="space-y-2">
-                              {combinedItems.map(renderLineItem)}
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    );
-                  }
-                )}
+                This is accordidion
               </Accordion>
             </TabsContent>
 
@@ -1058,9 +963,10 @@ const ComparisonApp = () => {
                     <CardTitle>Cost Discrepancies</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {result.comparison_results.cost_discrepancies.map(
+                    "{" "}
+                    {/* " {result.comparison_results.cost_discrepancies.map(
                       renderLineItem
-                    )}
+                    )}"" */}
                   </CardContent>
                 </Card>
 
@@ -1069,9 +975,11 @@ const ComparisonApp = () => {
                     <CardTitle>Quantity Discrepancies</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {result.comparison_results.quantity_discrepancies.map(
+                    "{" "}
+                    {/* {result.comparison_results.quantity_discrepancies.map(
                       renderLineItem
-                    )}
+                    )} */}
+                    "
                   </CardContent>
                 </Card>
               </div>
@@ -1085,9 +993,11 @@ const ComparisonApp = () => {
                     <CardTitle>Items Unique to Your Estimate</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {result.comparison_results.unique_to_doc1.map(
+                    "
+                    {/* {result.comparison_results.unique_to_doc1.map(
                       renderUniqueItem
-                    )}
+                    )} */}
+                    "
                   </CardContent>
                 </Card>
 
@@ -1096,9 +1006,11 @@ const ComparisonApp = () => {
                     <CardTitle>Items Unique to Carrier's Estimate</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {result.comparison_results.unique_to_doc2.map(
+                    "{" "}
+                    {/* " {result.comparison_results.unique_to_doc2.map(
                       renderUniqueItem
-                    )}
+                    )}" */}
+                    "
                   </CardContent>
                 </Card>
               </div>
