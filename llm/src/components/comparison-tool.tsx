@@ -905,13 +905,13 @@ const ComparisonApp = () => {
                       <p className="text-sm text-gray-500">
                         Items in Your Estimate
                       </p>
-                      <p className="text-2xl font-bold">{result.file1_count}</p>
+                      {/* <p className="text-2xl font-bold">{result.file1_count}</p> */}
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">
                         Items in Carrier's Estimate
                       </p>
-                      <p className="text-2xl font-bold">{result.file2_count}</p>
+                      {/* <p className="text-2xl font-bold">{result.file2_count}</p> */}
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">
@@ -919,7 +919,6 @@ const ComparisonApp = () => {
                       </p>
                       <p className="text-2xl font-bold">
                         {/* {result.overall_summary.total_discrepancies} */}
-                        "result.overall_summary.total_discrepancies"
                       </p>
                     </div>
                     {/* <div>
@@ -938,8 +937,8 @@ const ComparisonApp = () => {
                         {/* {formatPercentage(
                           result.overall_summary.average_difference_percentage
                         )} */}
-                        " result.overall_summary.average_difference_percentage"
-                        %
+                        {/* " result.overall_summary.average_difference_percentage"
+                        % */}
                       </p>
                     </div>
                   </div>
@@ -947,7 +946,7 @@ const ComparisonApp = () => {
               </Card>
 
               {/* AI Insights */}
-              {renderAIInsights(result.ai_insights)}
+              {/* {renderAIInsights(result.ai_insights)} */}
 
               {/* Categories Content */}
               <Accordion type="single" collapsible className="w-full">
