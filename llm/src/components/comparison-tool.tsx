@@ -882,9 +882,9 @@ const ComparisonApp = () => {
           <Tabs defaultValue="appraiser" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="appraiser">Recap</TabsTrigger>
-              <TabsTrigger value="categories">Categories</TabsTrigger>
+              {/* <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="discrepancies">Discrepancies</TabsTrigger>
-              <TabsTrigger value="unique">Unique Items</TabsTrigger>
+              <TabsTrigger value="unique">Unique Items</TabsTrigger> */}
             </TabsList>
 
             {/* Appraiser View Tab */}
@@ -892,128 +892,7 @@ const ComparisonApp = () => {
               <AppraiserView data={result} />
             </TabsContent>
 
-            {/* Other Views - Wrapped in a separate TabsContent */}
-            <TabsContent value="categories">
-              {/* Overall Summary Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Overall Analysis</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Items in Your Estimate
-                      </p>
-                      {/* <p className="text-2xl font-bold">{result.file1_count}</p> */}
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Items in Carrier's Estimate
-                      </p>
-                      {/* <p className="text-2xl font-bold">{result.file2_count}</p> */}
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Total Discrepancies
-                      </p>
-                      <p className="text-2xl font-bold">
-                        {/* {result.overall_summary.total_discrepancies} */}
-                      </p>
-                    </div>
-                    {/* <div>
-                      <p className="text-sm text-gray-500">Cost Difference</p>
-                      <p className="text-2xl font-bold">
-                        {formatCurrency(
-                          result.overall_summary.total_cost_difference
-                        )}
-                      </p>
-                    </div> */}
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Average Difference
-                      </p>
-                      <p className="text-2xl font-bold">
-                        {/* {formatPercentage(
-                          result.overall_summary.average_difference_percentage
-                        )} */}
-                        {/* " result.overall_summary.average_difference_percentage"
-                        % */}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* AI Insights */}
-              {/* {renderAIInsights(result.ai_insights)} */}
-
-              {/* Categories Content */}
-              <Accordion type="single" collapsible className="w-full">
-                This is accordidion
-              </Accordion>
-            </TabsContent>
-
-            {/* Discrepancies Tab */}
-            <TabsContent value="discrepancies">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Cost Discrepancies</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    "{" "}
-                    {/* " {result.comparison_results.cost_discrepancies.map(
-                      renderLineItem
-                    )}"" */}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quantity Discrepancies</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    "{" "}
-                    {/* {result.comparison_results.quantity_discrepancies.map(
-                      renderLineItem
-                    )} */}
-                    "
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            {/* Unique Items Tab */}
-            <TabsContent value="unique">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Items Unique to Your Estimate</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    "
-                    {/* {result.comparison_results.unique_to_doc1.map(
-                      renderUniqueItem
-                    )} */}
-                    "
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Items Unique to Carrier's Estimate</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    "{" "}
-                    {/* " {result.comparison_results.unique_to_doc2.map(
-                      renderUniqueItem
-                    )}" */}
-                    "
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+            {/* code here  */}
           </Tabs>
         </div>
       )}
