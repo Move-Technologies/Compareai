@@ -8,7 +8,13 @@ import {
 } from "@/components/ui/accordion";
 import VarianceComparison from "./variance-view";
 
-const AppraiserView = ({ data }: { data: any }) => {
+const AppraiserView = ({
+  data,
+  titleComparison,
+}: {
+  data: any;
+  titleComparison: string;
+}) => {
   const formatCurrency = (value) => {
     if (value === null || value === undefined) return "$0.00";
     const num = typeof value === "string" ? parseFloat(value) : value;
@@ -55,7 +61,7 @@ const AppraiserView = ({ data }: { data: any }) => {
     <div className="space-y-6">
       {/* Market Rate Analysis */}
       {/* card must be here */}
-      <VarianceComparison data={data} />
+      <VarianceComparison data={data} titleComparison={titleComparison} />
       {/* Labor vs Materials Analysis */}
       {/* <Card>
         <CardHeader>

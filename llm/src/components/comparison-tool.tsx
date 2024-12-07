@@ -881,18 +881,28 @@ const ComparisonApp = () => {
         <div className="mt-8 space-y-6">
           <Tabs defaultValue="appraiser" className="w-full">
             <TabsList className="grid w-full grid-cols-4 gap-2">
-              <TabsTrigger value="appraiser">Recap By Category</TabsTrigger>
-              <TabsTrigger value="appraiser">Recap By Room</TabsTrigger>
+              <TabsTrigger value="recap_comparison">
+                Recap By Category
+              </TabsTrigger>
+              <TabsTrigger value="room_comparison">Recap By Room</TabsTrigger>
               {/* <TabsTrigger value="categories">Categories</TabsTrigger>
               <TabsTrigger value="discrepancies">Discrepancies</TabsTrigger>
               <TabsTrigger value="unique">Unique Items</TabsTrigger> */}
             </TabsList>
 
             {/* Appraiser View Tab */}
-            <TabsContent value="appraiser">
-              <AppraiserView data={result} />
+            <TabsContent value="recap_comparison">
+              <AppraiserView
+                data={result?.recap_comparison}
+                titleComparison="Category"
+              />
             </TabsContent>
-
+            <TabsContent value="room_comparison">
+              <AppraiserView
+                data={result?.room_comparison}
+                titleComparison="Room"
+              />
+            </TabsContent>
             {/* code here  */}
           </Tabs>
         </div>

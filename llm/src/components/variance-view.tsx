@@ -24,8 +24,15 @@ const formatCurrency = (value) => {
   }).format(num);
 };
 
-const VarianceComparison = ({ data }: { data: any }) => {
-  const dataRows = data?.recap_comparison?.comparison_results || [];
+const VarianceComparison = ({
+  data,
+  titleComparison,
+}: {
+  data: any;
+  titleComparison: string;
+}) => {
+  const objectToCompare = titleComparison.toLowerCase();
+  const dataRows = data?.comparison_results || [];
   const [showMore, setShowMore] = React.useState(false);
   // Calculate totals
   const calculateTotals = () => {
@@ -59,14 +66,14 @@ const VarianceComparison = ({ data }: { data: any }) => {
       <CardContent>
         <div
           className={cn("relative w-full overflow-x-auto overflow-y-hidden", {
-            "h-[300px]": !showMore,
+            // "h-[300px]": !showMore,
           })}
         >
           <Table className="w-[600px] relative">
             <TableHeader>
               <TableRow>
                 <TableHead className="" colSpan={1}>
-                  Category
+                  {titleComparison}
                 </TableHead>
                 <TableHead className="text-center">Your Estimate</TableHead>
                 <TableHead className="text-center">Other Estimate</TableHead>
@@ -77,7 +84,7 @@ const VarianceComparison = ({ data }: { data: any }) => {
               {dataRows.map((row, idx) => (
                 <TableRow key={`row-recap-${idx}`} className="border-b">
                   <TableCell className="py-2" colSpan={1}>
-                    {row.category}
+                    {row[objectToCompare]}
                   </TableCell>
                   <TableCell className="text-center py-2">
                     {row.your_estimate !== "N/A"

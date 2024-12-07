@@ -1,6 +1,6 @@
 import ComparisonTool from "@/components/comparison-tool";
 
-export default function Home() {
+export default async function Home() {
   return <ComparisonTool />;
   // return <></>;
 }
